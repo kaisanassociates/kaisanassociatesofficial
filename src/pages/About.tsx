@@ -6,22 +6,8 @@ import kaisanLogo from "@/assets/kaisan-logo.png";
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/">
-            <img src={kaisanLogo} alt="Kaisan Associates" className="h-12 object-contain" />
-          </Link>
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </header>
-
-      <main className="pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <main className="pt-8 pb-16">
         <AboutInfluencia />
       </main>
 

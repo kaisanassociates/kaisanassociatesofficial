@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { loginAttendee } from "@/lib/api";
+import { apiService } from "@/lib/api";
 import kaisanLogo from "@/assets/kaisan-logo.png";
 
 const formSchema = z.object({
@@ -18,7 +18,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const Login = () => {
+const TicketAccess = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -34,11 +34,26 @@ const Login = () => {
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      const attendee = await loginAttendee({
-        fullName: values.fullName,
-        dateOfBirth: values.dateOfBirth,
-      });
-      localStorage.setItem("attendee", JSON.stringify(attendee));
+      // Search for attendee by name and date of birth
+      const response = await fetch('/api/registrations');
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error('Failed to fetch registrations');
+      }
+      
+      // Find matching attendee
+      const attendees = result.data || [];
+      const matchingAttendee = attendees.find((attendee: any) => 
+        attendee.name.toLowerCase().includes(values.fullName.toLowerCase()) &&
+        attendee.dateOfBirth === values.dateOfBirth
+      );
+      
+      if (!matchingAttendee) {
+        throw new Error('No matching attendee found');
+      }
+      
+      localStorage.setItem("attendee", JSON.stringify(matchingAttendee));
       toast({
         title: "Login successful!",
         description: "Redirecting to your e-pass...",
@@ -130,4 +145,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default TicketAccess;

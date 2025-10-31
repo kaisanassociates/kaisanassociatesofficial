@@ -28,14 +28,6 @@ const Ticket = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-12 px-4">
       <div className="container mx-auto max-w-4xl">
-        <div className="mb-8 print:hidden">
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
 
         <div className="glass-panel p-8 md:p-12 animate-scale-in">
           {/* Header */}

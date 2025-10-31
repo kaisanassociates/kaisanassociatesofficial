@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Phone, Mail, Calendar, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,26 +9,21 @@ import kaisanLogo from "@/assets/kaisan-logo.png";
 const Index = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  useEffect(() => {
+    const handleOpenRegistration = () => {
+      setIsFormOpen(true);
+    };
+
+    window.addEventListener('openRegistrationModal', handleOpenRegistration);
+    
+    return () => {
+      window.removeEventListener('openRegistrationModal', handleOpenRegistration);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/">
-            <img src={kaisanLogo} alt="Kaisan Associates" className="h-12 object-contain" />
-          </Link>
-          <Link to="/about">
-            <Button variant="ghost" size="sm">
-              <Info className="w-4 h-4 mr-2" />
-              About
-            </Button>
-          </Link>
-        </div>
-      </nav>
-
-      <div className="pt-20">
-        <Hero onRegisterClick={() => setIsFormOpen(true)} />
-      </div>
+      <Hero onRegisterClick={() => setIsFormOpen(true)} />
       
       {/* Contact Section */}
       <section className="py-32 bg-gradient-to-b from-background to-primary/5 relative overflow-hidden">

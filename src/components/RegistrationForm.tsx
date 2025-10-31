@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,22 +7,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, Check, Loader2 } from "lucide-react";
+import { X, Check, Loader2, AlertCircle, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
+import { apiService } from "@/lib/api";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters").max(100).trim(),
-  contactNumber: z.string().min(10, "Enter a valid contact number").max(20).trim(),
-  email: z.string().email("Enter a valid email address").max(255).trim(),
-  linkedinProfile: z.string().max(500).optional(),
+  contactNumber: z.string()
+    .min(10, "Enter a valid contact number (10+ digits)")
+    .max(20, "Contact number too long")
+    .regex(/^[\+]?[\d\s\-\(\)]+$/, "Enter a valid phone number")
+    .trim(),
+  email: z.string()
+    .email("Enter a valid email address")
+    .max(255)
+    .regex(/^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}$/, "Enter a valid email format")
+    .trim(),
+  linkedinProfile: z.string()
+    .max(500, "LinkedIn URL too long")
+    .regex(/^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/, "Enter a valid LinkedIn URL")
+    .optional()
+    .or(z.literal("")),
   designation: z.string().min(2, "Designation is required").max(100).trim(),
   business: z.string().min(2, "Business/Organization is required").max(200).trim(),
   sectors: z.array(z.string()).min(1, "Select at least one sector"),
   otherSector: z.string().max(100).optional(),
-  experience: z.string().min(1, "Experience is required").max(50).trim(),
-  achievements: z.string().max(1000).optional(),
-  futurePlan: z.string().min(10, "Please share your 5-year plan").max(1000).trim(),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  experience: z.string()
+    .min(1, "Experience is required")
+    .max(50)
+    .regex(/^[\d\+\-\s]+$/, "Enter valid experience (e.g., 5 years)")
+    .trim(),
+  achievements: z.string().max(1000, "Achievements too long (max 1000 characters)").optional(),
+  futurePlan: z.string()
+    .min(50, "Please share a more detailed 5-year plan (min 50 characters)")
+    .max(1000, "Future plan too long (max 1000 characters)")
+    .trim(),
+  dateOfBirth: z.string()
+    .min(1, "Date of birth is required")
+    .refine((date) => {
+      const birthDate = new Date(date);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      return age >= 18 && age <= 100;
+    }, "Age must be between 18 and 100 years"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -50,12 +77,17 @@ interface RegistrationFormProps {
 const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    trigger,
+    watch,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
@@ -64,41 +96,70 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
     setIsSubmitting(true);
     
     try {
-      const registrationData = {
-        ...data,
+      // Clean up the data before submission
+      const cleanData = {
+        fullName: data.fullName,
+        email: data.email,
+        contactNumber: data.contactNumber,
+        business: data.business,
         sectors: selectedSectors,
+        designation: data.designation,
+        experience: data.experience,
+        achievements: data.achievements || undefined,
+        futurePlan: data.futurePlan,
+        dateOfBirth: data.dateOfBirth,
+        linkedinProfile: data.linkedinProfile || undefined,
+        otherSector: data.otherSector || undefined,
+        registrationDate: new Date().toISOString(),
+        paymentStatus: 'pending'
       };
       
-      const response = await fetch('http://localhost:3000/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registrationData),
-      });
-
-      if (!response.ok) throw new Error('Registration failed');
+      const result = await apiService.registerAttendee(cleanData);
       
-      const attendee = await response.json();
-      
-      toast.success("Registration Successful!", {
-        description: "Redirecting to your e-pass...",
-      });
-      
-      localStorage.setItem("attendee", JSON.stringify(attendee));
-      
-      reset();
-      setSelectedSectors([]);
-      onClose();
-      
-      setTimeout(() => {
-        window.location.href = '/ticket';
-      }, 1500);
-    } catch (error) {
-      toast.error("Registration Failed", {
-        description: "Please try again or contact support.",
-      });
+      if (result.success) {
+        console.log("Registration successful:", result);
+        toast.success("Registration successful! Welcome to Kaisan Network.");
+        setShowSuccess(true);
+        reset();
+        setSelectedSectors([]);
+        setCurrentStep(1);
+        onClose();
+      } else {
+        throw new Error(result.message || "Registration failed");
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      const errorMessage = error.message || "Registration failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const nextStep = async () => {
+    const fieldsToValidate = currentStep === 1 
+      ? ["fullName", "contactNumber", "email", "dateOfBirth"]
+      : ["designation", "business", "experience", "sectors"];
+    
+    const isValid = await trigger(fieldsToValidate as any);
+    if (isValid) {
+      setCurrentStep(prev => Math.min(prev + 1, 3));
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep === 1) {
+      setShowBackConfirm(true);
+    } else {
+      setCurrentStep(prev => Math.max(prev - 1, 1));
+    }
+  };
+
+  const handleBackConfirm = () => {
+    setShowBackConfirm(false);
+    reset();
+    setSelectedSectors([]);
+    setCurrentStep(1);
   };
 
   const handleSectorToggle = (sector: string) => {
@@ -139,8 +200,9 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
-          {/* Personal Information */}
-          <div className="space-y-6">
+          {/* Step 1: Personal Information */}
+          {currentStep === 1 && (
+          <div className="space-y-6 animate-fade-in">
             <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">1</div>
               Personal Information
@@ -211,9 +273,11 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
               </div>
             </div>
           </div>
-
-          {/* Professional Information */}
-          <div className="space-y-6">
+          )}
+  
+          {/* Step 2: Professional Information */}
+          {currentStep === 2 && (
+          <div className="space-y-6 animate-fade-in">
             <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">2</div>
               Professional Information
@@ -293,61 +357,87 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
               )}
             </div>
           </div>
+          )}
 
-          {/* Additional Information */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">3</div>
-              Additional Information
-            </h3>
+          {/* Step 3: Additional Information */}
+          {currentStep === 3 && (
+            <div className="space-y-6 animate-fade-in">
+              <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">3</div>
+                Additional Information
+              </h3>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="achievements">Key Achievements / Milestones</Label>
-                <Textarea
-                  id="achievements"
-                  {...register("achievements")}
-                  placeholder="Share your notable achievements and milestones..."
-                  rows={4}
-                  className="bg-background border-border focus:border-primary transition-colors resize-none"
-                />
-              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="achievements">Key Achievements / Milestones</Label>
+                  <Textarea
+                    id="achievements"
+                    {...register("achievements")}
+                    placeholder="Share your notable achievements and milestones..."
+                    rows={4}
+                    className="bg-background border-border focus:border-primary transition-colors resize-none"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="futurePlan">Future Plan for Next 5 Years *</Label>
-                <Textarea
-                  id="futurePlan"
-                  {...register("futurePlan")}
-                  placeholder="Describe your vision and goals for the next 5 years..."
-                  rows={4}
-                  className="bg-background border-border focus:border-primary transition-colors resize-none"
-                />
-                {errors.futurePlan && (
-                  <p className="text-sm text-destructive">{errors.futurePlan.message}</p>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="futurePlan">Future Plan for Next 5 Years *</Label>
+                  <Textarea
+                    id="futurePlan"
+                    {...register("futurePlan")}
+                    placeholder="Describe your vision and goals for the next 5 years..."
+                    rows={4}
+                    className="bg-background border-border focus:border-primary transition-colors resize-none"
+                  />
+                  {errors.futurePlan && (
+                    <p className="text-sm text-destructive">{errors.futurePlan.message}</p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Submit Button */}
+          {/* Navigation Buttons */}
           <div className="flex gap-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold py-7 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Check className="w-5 h-5 mr-2" />
-                  Complete Registration
-                </>
-              )}
-            </Button>
+            {currentStep > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={prevStep}
+                className="px-8 py-6 rounded-full font-semibold"
+              >
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                Previous
+              </Button>
+            )}
+            
+            {currentStep < 3 ? (
+              <Button
+                type="button"
+                onClick={nextStep}
+                className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                Next Step
+                <Check className="w-5 h-5 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-5 h-5 mr-2" />
+                    Complete Registration
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </form>
       </div>
