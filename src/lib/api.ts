@@ -1,4 +1,37 @@
-import { RegistrationData, ApiResponse } from './api-utils';
+export interface Attendee {
+  _id?: string;
+  fullName: string;
+  email: string;
+  contactNumber: string;
+  business: string;
+  designation: string;
+  dateOfBirth: string;
+  sectors?: string[];
+  experience?: string;
+  achievements?: string;
+  futurePlan?: string;
+  linkedinProfile?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+  website?: string;
+  gstin?: string;
+  pan?: string;
+  referralCode?: string;
+  qrCode: string;
+  registrationDate: string;
+  attended: boolean;
+  checkInTime?: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? window.location.origin 
@@ -45,7 +78,7 @@ class ApiService {
     }
   }
 
-  async submitRegistration(data: Omit<RegistrationData, 'registrationDate' | 'paymentStatus'>): Promise<ApiResponse<RegistrationData>> {
+  async submitRegistration(data: any): Promise<ApiResponse<Attendee>> {
     try {
       const response = await fetch(`${this.baseUrl}/api/register`, {
         method: 'POST',
@@ -69,7 +102,7 @@ class ApiService {
     }
   }
 
-  async getRegistrations(): Promise<ApiResponse<RegistrationData[]>> {
+  async getRegistrations(): Promise<ApiResponse<Attendee[]>> {
     try {
       const response = await fetch(`${this.baseUrl}/api/registrations`, {
         method: 'GET',
