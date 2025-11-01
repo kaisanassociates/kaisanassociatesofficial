@@ -46,10 +46,22 @@ const TicketAccess = () => {
       
       // Find matching attendee by email and DOB
       const attendees = result.data || [];
-      const matchingAttendee = attendees.find((attendee: any) => 
-        attendee.email.toLowerCase() === values.email.toLowerCase() &&
-        attendee.dateOfBirth === values.dateOfBirth
-      );
+      
+      // Normalize the date from the form (input type="date" returns YYYY-MM-DD)
+      const normalizedFormDate = values.dateOfBirth;
+      
+      const matchingAttendee = attendees.find((attendee: any) => {
+        // Normalize stored date (handle both string and date formats)
+        let storedDate = attendee.dateOfBirth;
+        if (storedDate) {
+          // If it's already in YYYY-MM-DD format, use it
+          // If it's a full date string, extract just the date part
+          storedDate = storedDate.split('T')[0];
+        }
+        
+        return attendee.email.toLowerCase() === values.email.toLowerCase() &&
+               storedDate === normalizedFormDate;
+      });
       
       if (!matchingAttendee) {
         toast.error("No registration found with these credentials");

@@ -58,7 +58,7 @@ const NavigationBar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-2">
+            <div className="hidden lg:flex items-center space-x-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -66,47 +66,41 @@ const NavigationBar = () => {
                     <button
                       key={item.name}
                       onClick={item.onClick}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
+                      className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                         isActive(item.href)
-                          ? 'text-primary bg-primary/10 shadow-sm border border-primary/20'
-                          : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
+                          ? 'text-primary bg-primary/10 shadow-sm'
+                          : 'text-foreground hover:text-primary hover:bg-primary/5'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
                       <span>{item.name}</span>
-                      {isActive(item.href) && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>
-                      )}
                     </button>
                   ) : (
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
+                      className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                         isActive(item.href)
-                          ? 'text-primary bg-primary/10 shadow-sm border border-primary/20'
-                          : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
+                          ? 'text-primary bg-primary/10 shadow-sm'
+                          : 'text-foreground hover:text-primary hover:bg-primary/5'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
                       <span>{item.name}</span>
-                      {isActive(item.href) && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>
-                      )}
                     </Link>
                   )
                 );
               })}
               
               {/* Contact Buttons */}
-              <div className="flex items-center space-x-2 ml-6">
-                <a href="tel:+918589990060" className="hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
+              <div className="flex items-center space-x-1 ml-4 pl-4 border-l border-border/50">
+                <a href="tel:+918589990060" className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
                   <Phone className="h-4 w-4" />
-                  <span>+91 858 999 00 60</span>
+                  <span className="hidden xl:inline">+91 858 999 00 60</span>
                 </a>
-                <a href="mailto:info@kaisanassociates.com" className="hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
+                <a href="mailto:info@kaisanassociates.com" className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
                   <Mail className="h-4 w-4" />
-                  <span>Email Us</span>
+                  <span className="hidden xl:inline">Email</span>
                 </a>
               </div>
             </div>

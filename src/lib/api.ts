@@ -1,5 +1,6 @@
 export interface Attendee {
   _id?: string;
+  id?: string;
   fullName: string;
   email: string;
   contactNumber: string;
@@ -24,6 +25,8 @@ export interface Attendee {
   registrationDate: string;
   attended: boolean;
   checkInTime?: string;
+  paymentStatus?: 'pending' | 'confirmed' | 'cancelled';
+  ticketType?: string;
 }
 
 export interface ApiResponse<T = any> {

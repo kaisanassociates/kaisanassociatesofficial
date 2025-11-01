@@ -88,8 +88,10 @@ const Ticket = () => {
                   </span>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Attendance: <span className={attendee.attended ? "text-green-500 font-semibold" : "text-gray-500"}>
-                    {attendee.attended ? "✓ Checked In" : "Not yet checked in"}
+                  Check-in Status: <span className={attendee.attended ? "text-green-500 font-semibold" : "text-gray-500"}>
+                    {attendee.attended ? "✓ Checked In" : 
+                     attendee.paymentStatus === 'confirmed' ? "Awaiting Check-in" : 
+                     "Pending Payment"}
                   </span>
                 </p>
                 {attendee.attended && attendee.checkInTime && (

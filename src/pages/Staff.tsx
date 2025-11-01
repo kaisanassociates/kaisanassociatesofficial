@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Scan, CheckCircle } from "lucide-react";
+import { ArrowLeft, Scan, CheckCircle, Camera, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Html5Qrcode } from "html5-qrcode";
 import kaisanLogo from "@/assets/kaisan-logo.png";
 
 const Staff = () => {
@@ -12,6 +13,18 @@ const Staff = () => {
   const [qrCode, setQrCode] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [lastScanned, setLastScanned] = useState<any>(null);
+  const [scanMode, setScanMode] = useState<'camera' | 'manual'>('manual');
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup camera on unmount
+      if (html5QrCodeRef.current && isCameraActive) {
+        html5QrCodeRef.current.stop().catch(console.error);
+      }
+    };
+  }, [isCameraActive]);
 
   const handleLogin = () => {
     if (!staffKey.trim()) {
@@ -22,8 +35,61 @@ const Staff = () => {
     toast.success("Staff access granted");
   };
 
-  const handleScan = async () => {
-    if (!qrCode.trim()) {
+  const startCamera = async () => {
+    try {
+      const html5QrCode = new Html5Qrcode("qr-reader");
+      html5QrCodeRef.current = html5QrCode;
+      
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        (decodedText) => {
+          setQrCode(decodedText);
+          stopCamera();
+          handleScan(decodedText);
+        },
+        () => {
+          // ignore errors during scanning
+        }
+      );
+      
+      setIsCameraActive(true);
+      setScanMode('camera');
+      toast.success("Camera started");
+    } catch (err) {
+      console.error("Error starting camera:", err);
+      toast.error("Failed to start camera. Please check permissions.");
+    }
+  };
+
+  const stopCamera = async () => {
+    if (html5QrCodeRef.current && isCameraActive) {
+      try {
+        await html5QrCodeRef.current.stop();
+        setIsCameraActive(false);
+        toast.info("Camera stopped");
+      } catch (err) {
+        console.error("Error stopping camera:", err);
+      }
+    }
+  };
+
+  const toggleScanMode = () => {
+    if (scanMode === 'manual') {
+      startCamera();
+    } else {
+      stopCamera();
+      setScanMode('manual');
+    }
+  };
+
+  const handleScan = async (scannedCode?: string) => {
+    const codeToScan = scannedCode || qrCode;
+    
+    if (!codeToScan.trim()) {
       toast.error("Please enter QR code");
       return;
     }
@@ -44,21 +110,28 @@ const Staff = () => {
       }
       
       // Find attendee by QR code
-      const attendee = getResult.data.find((a: any) => a.qrCode === qrCode.trim());
+      const attendee = getResult.data.find((a: any) => a.qrCode === codeToScan.trim());
       
       if (!attendee) {
         toast.error("Invalid QR code - Attendee not found");
         setIsScanning(false);
+        setQrCode("");
         return;
       }
       
-      // Get the attendee ID (try both _id and id fields)
-      const attendeeId = attendee._id || attendee.id;
+      // Get the attendee ID - handle MongoDB ObjectId format
+      let attendeeId = attendee._id || attendee.id;
+      
+      // If _id is an object with $oid, extract it
+      if (typeof attendeeId === 'object' && attendeeId.$oid) {
+        attendeeId = attendeeId.$oid;
+      }
       
       if (!attendeeId) {
         toast.error("Invalid attendee data - ID missing");
         console.error('Attendee object:', attendee);
         setIsScanning(false);
+        setQrCode("");
         return;
       }
       
@@ -139,26 +212,71 @@ const Staff = () => {
         </Link>
 
         <div className="max-w-2xl mx-auto">
-          <div className="glass-panel p-6 md:p-8 text-center">
-            <Scan className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-6 text-primary" />
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Scan Attendee QR Code</h2>
-            <p className="text-muted-foreground mb-8 text-sm md:text-base">
-              Enter or scan the QR code from the attendee's e-pass
-            </p>
+          <div className="glass-panel p-6 md:p-8">
+            <div className="text-center mb-6">
+              <Scan className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-primary" />
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">Scan Attendee QR Code</h2>
+              <p className="text-muted-foreground text-sm md:text-base">
+                {scanMode === 'camera' ? 'Point camera at QR code' : 'Enter or scan the QR code from attendee e-pass'}
+              </p>
+            </div>
 
-            <div className="space-y-4">
-              <Input
-                placeholder="Enter QR code or scan..."
-                value={qrCode}
-                onChange={(e) => setQrCode(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleScan()}
-                className="text-base md:text-lg h-12 md:h-14"
-                autoFocus
-              />
-              <Button onClick={handleScan} className="w-full h-12 md:h-14 text-base font-semibold" size="lg" disabled={isScanning}>
-                {isScanning ? "Scanning..." : "Mark Attendance"}
+            {/* Mode Toggle */}
+            <div className="flex gap-2 mb-6">
+              <Button
+                onClick={toggleScanMode}
+                variant={scanMode === 'camera' ? 'default' : 'outline'}
+                className="flex-1 h-12"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Camera Scan
+              </Button>
+              <Button
+                onClick={() => {
+                  if (scanMode === 'camera') {
+                    stopCamera();
+                    setScanMode('manual');
+                  }
+                }}
+                variant={scanMode === 'manual' ? 'default' : 'outline'}
+                className="flex-1 h-12"
+              >
+                <Keyboard className="w-4 h-4 mr-2" />
+                Manual Entry
               </Button>
             </div>
+
+            {/* Camera View */}
+            {scanMode === 'camera' && (
+              <div className="mb-6">
+                <div 
+                  id="qr-reader" 
+                  className="w-full rounded-lg overflow-hidden border-2 border-primary/20"
+                />
+              </div>
+            )}
+
+            {/* Manual Input */}
+            {scanMode === 'manual' && (
+              <div className="space-y-4">
+                <Input
+                  placeholder="Enter QR code..."
+                  value={qrCode}
+                  onChange={(e) => setQrCode(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleScan()}
+                  className="text-base md:text-lg h-12 md:h-14"
+                  autoFocus
+                />
+                <Button 
+                  onClick={() => handleScan()} 
+                  className="w-full h-12 md:h-14 text-base font-semibold" 
+                  size="lg" 
+                  disabled={isScanning}
+                >
+                  {isScanning ? "Scanning..." : "Mark Attendance"}
+                </Button>
+              </div>
+            )}
           </div>
 
           {lastScanned && (
