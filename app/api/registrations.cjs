@@ -66,11 +66,18 @@ module.exports = async function handler(req, res) {
 
     await connectDB();
     
-    const registrations = await Registration.find({}).sort({ registrationDate: -1 });
+    const registrations = await Registration.find({}).sort({ registrationDate: -1 }).lean();
+    
+    // Convert _id to string to ensure proper serialization
+    const formattedRegistrations = registrations.map(reg => ({
+      ...reg,
+      _id: reg._id.toString(),
+      id: reg._id.toString()
+    }));
     
     return res.status(200).json({
       success: true,
-      data: registrations
+      data: formattedRegistrations
     });
 
   } catch (error) {

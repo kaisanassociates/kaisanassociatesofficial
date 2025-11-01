@@ -1,21 +1,20 @@
 {
   "functions": {
-    "app/api/register.js": {
+    "api/register.ts": {
       "runtime": "nodejs18.x"
     },
-    "app/api/registrations.js": {
+    "api/registrations.ts": {
       "runtime": "nodejs18.x"
     },
-    "app/api/attendees/[attendeeId].js": {
+    "api/attendees/[attendeeId].ts": {
       "runtime": "nodejs18.x"
     },
-    "app/api/ticket/[ticketId].js": {
+    "api/ticket/[ticketId].ts": {
       "runtime": "nodejs18.x"
     }
   },
   "env": {
     "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
     "NODE_ENV": "production"
   },
   "buildCommand": "npm run build",
@@ -24,19 +23,19 @@
   "rewrites": [
     {
       "source": "/api/register",
-      "destination": "/app/api/register.js"
+      "destination": "/api/register"
     },
     {
       "source": "/api/registrations",
-      "destination": "/app/api/registrations.js"
+      "destination": "/api/registrations"
     },
     {
       "source": "/api/attendees/:attendeeId",
-      "destination": "/app/api/attendees/[attendeeId].js"
+      "destination": "/api/attendees/[attendeeId]"
     },
     {
       "source": "/api/ticket/:ticketId",
-      "destination": "/app/api/ticket/[ticketId].js"
+      "destination": "/api/ticket/[ticketId]"
     },
     {
       "source": "/(.*)",

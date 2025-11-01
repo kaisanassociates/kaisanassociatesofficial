@@ -77,10 +77,26 @@ const Ticket = () => {
                   Registered: {new Date(attendee.registrationDate).toLocaleDateString()}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Status: <span className={attendee.attended ? "text-green-500" : "text-yellow-500"}>
-                    {attendee.attended ? "Attended" : "Confirmed"}
+                  Payment Status: <span className={
+                    attendee.paymentStatus === 'confirmed' ? "text-green-500 font-semibold" : 
+                    attendee.paymentStatus === 'cancelled' ? "text-red-500 font-semibold" : 
+                    "text-yellow-500 font-semibold"
+                  }>
+                    {attendee.paymentStatus === 'confirmed' ? "✓ Confirmed" : 
+                     attendee.paymentStatus === 'cancelled' ? "✗ Cancelled" : 
+                     "⏳ Pending Payment"}
                   </span>
                 </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Attendance: <span className={attendee.attended ? "text-green-500 font-semibold" : "text-gray-500"}>
+                    {attendee.attended ? "✓ Checked In" : "Not yet checked in"}
+                  </span>
+                </p>
+                {attendee.attended && attendee.checkInTime && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Check-in: {new Date(attendee.checkInTime).toLocaleString()}
+                  </p>
+                )}
               </div>
             </div>
 

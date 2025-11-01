@@ -62,7 +62,13 @@ module.exports = async function handler(req, res) {
     
     const { attendeeId } = req.query;
     
+    console.log('Attendee handler - Method:', req.method);
+    console.log('Attendee handler - Query:', req.query);
+    console.log('Attendee handler - Params:', req.params);
+    console.log('Attendee handler - attendeeId:', attendeeId);
+    
     if (!attendeeId) {
+      console.error('Missing attendeeId! Query:', req.query, 'Params:', req.params);
       return res.status(400).json({
         success: false,
         error: 'Attendee ID is required'

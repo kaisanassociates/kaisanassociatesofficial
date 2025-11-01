@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env or .env.local');
+  throw new Error(
+    'Please define MONGODB_URI environment variable in .env or .env.local file'
+  );
 }
 
 interface MongooseCache {
@@ -21,6 +23,13 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
+/**
+ * Establishes a MongoDB connection using Mongoose with connection pooling.
+ * Uses global caching to reuse connections across serverless function invocations.
+ * 
+ * @returns {Promise<typeof mongoose>} The Mongoose connection instance
+ * @throws {Error} If connection fails or MONGODB_URI is not defined
+ */
 async function connectDB() {
   // Return cached connection if available AND ready
   if (cached!.conn && cached!.conn.connection.readyState === 1) {
@@ -31,9 +40,10 @@ async function connectDB() {
   if (!cached!.promise) {
     const opts = {
       bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
+      maxPoolSize: 10, // Maximum number of connections in the pool
+      serverSelectionTimeoutMS: 10000, // Timeout for selecting a server (increased from 5s)
+      socketTimeoutMS: 45000, // Timeout for socket operations
+      family: 4, // Use IPv4, skip trying IPv6
     };
 
     console.log('🔄 Connecting to MongoDB Atlas...');
@@ -46,19 +56,6 @@ async function connectDB() {
       })
       .catch((error) => {
         console.error('❌ MongoDB connection error:', error.message);
-        
-        // Check if it's an IP whitelist error
-        if (error.message.includes('IP') || error.message.includes('whitelist') || error.message.includes('not connect')) {
-          console.error('');
-          console.error('🔒 ACTION REQUIRED: Whitelist your IP in MongoDB Atlas');
-          console.error('   1. Go to: https://cloud.mongodb.com');
-          console.error('   2. Navigate to: Network Access → IP Access List');
-          console.error('   3. Click: Add IP Address');
-          console.error('   4. Add: 0.0.0.0/0 (allow all) OR your current IP');
-          console.error('   5. Wait 1-2 minutes for changes to propagate');
-          console.error('');
-        }
-        
         // Reset promise on error so next invocation can retry
         cached!.promise = null;
         throw error;
@@ -68,10 +65,15 @@ async function connectDB() {
   try {
     cached!.conn = await cached!.promise;
     
-    // CRITICAL: Wait for connection to be fully ready
+    // CRITICAL: Wait for connection to be fully ready before returning
+    // This prevents "bufferCommands = false" errors
     if (cached!.conn.connection.readyState !== 1) {
+      console.log('⏳ Waiting for MongoDB connection to be ready...');
       await new Promise<void>((resolve) => {
-        cached!.conn!.connection.once('connected', () => resolve());
+        cached!.conn!.connection.once('connected', () => {
+          console.log('✅ MongoDB connection is now ready');
+          resolve();
+        });
       });
     }
   } catch (e) {
@@ -81,6 +83,19 @@ async function connectDB() {
   }
 
   return cached!.conn;
+}
+
+/**
+ * Closes the MongoDB connection.
+ * Useful for cleanup in non-serverless environments.
+ */
+export async function disconnectDB() {
+  if (cached?.conn) {
+    await mongoose.disconnect();
+    cached.conn = null;
+    cached.promise = null;
+    console.log('🔌 MongoDB disconnected');
+  }
 }
 
 export default connectDB;

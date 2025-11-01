@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import connectDB from '../src/lib/mongoose';
+import connectDB from '../../src/lib/mongoose';
 import mongoose from 'mongoose';
 
 const registrationSchema = new mongoose.Schema({

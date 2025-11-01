@@ -30,24 +30,72 @@ const Staff = () => {
 
     setIsScanning(true);
     try {
-      // In production, call your API endpoint to mark attendance
-      // const response = await fetch(`/api/attendees/${qrCode}`, { method: 'PUT', ... });
+      // First, get all registrations to find matching QR code
+      const getResponse = await fetch('/api/registrations', {
+        headers: {
+          'Authorization': 'Bearer admin123'
+        }
+      });
       
-      const mockAttendee = {
-        _id: "mock-id-" + Date.now(),
-        fullName: "John Doe",
-        email: "john@example.com",
-        contactNumber: "+1234567890",
-        designation: "Business Owner",
-        business: "Tech Solutions",
-        attended: true
-      };
+      const getResult = await getResponse.json();
       
-      setLastScanned(mockAttendee);
+      if (!getResult.success) {
+        throw new Error('Failed to fetch registrations');
+      }
+      
+      // Find attendee by QR code
+      const attendee = getResult.data.find((a: any) => a.qrCode === qrCode.trim());
+      
+      if (!attendee) {
+        toast.error("Invalid QR code - Attendee not found");
+        setIsScanning(false);
+        return;
+      }
+      
+      // Get the attendee ID (try both _id and id fields)
+      const attendeeId = attendee._id || attendee.id;
+      
+      if (!attendeeId) {
+        toast.error("Invalid attendee data - ID missing");
+        console.error('Attendee object:', attendee);
+        setIsScanning(false);
+        return;
+      }
+      
+      if (attendee.attended) {
+        toast.warning(`${attendee.name || attendee.fullName} already checked in!`);
+        setLastScanned(attendee);
+        setQrCode("");
+        setIsScanning(false);
+        return;
+      }
+      
+      // Mark attendance
+      const updateResponse = await fetch(`/api/attendees/${attendeeId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin123'
+        },
+        body: JSON.stringify({ 
+          action: 'toggle_attendance',
+          attended: true,
+          checkInTime: new Date().toISOString()
+        })
+      });
+      
+      const updateResult = await updateResponse.json();
+      
+      if (!updateResult.success) {
+        throw new Error(updateResult.error || 'Failed to mark attendance');
+      }
+      
+      setLastScanned(updateResult.data);
       setQrCode("");
-      toast.success(`${mockAttendee.fullName} marked as attended`);
-    } catch (error) {
-      toast.error("Invalid QR code or already scanned");
+      toast.success(`✓ ${updateResult.data.name || updateResult.data.fullName} checked in successfully!`);
+    } catch (error: any) {
+      console.error('Scan error:', error);
+      toast.error(error.message || "Error scanning QR code");
     } finally {
       setIsScanning(false);
     }
@@ -118,27 +166,33 @@ const Staff = () => {
               <div className="flex items-center gap-4 mb-6">
                 <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-green-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xl md:text-2xl font-bold truncate">{lastScanned.fullName}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold truncate">{lastScanned.fullName || lastScanned.name}</h3>
                   <p className="text-sm text-muted-foreground truncate">{lastScanned.email}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base">
                 <div>
                   <p className="text-muted-foreground">Designation</p>
-                  <p className="font-medium">{lastScanned.designation}</p>
+                  <p className="font-medium">{lastScanned.designation || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Business</p>
-                  <p className="font-medium">{lastScanned.business}</p>
+                  <p className="font-medium">{lastScanned.business || lastScanned.organization || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Contact</p>
-                  <p className="font-medium">{lastScanned.contactNumber}</p>
+                  <p className="font-medium">{lastScanned.contactNumber || lastScanned.phone}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Status</p>
-                  <p className="font-medium text-green-500">Checked In</p>
+                  <p className="font-medium text-green-500">✓ Checked In</p>
                 </div>
+                {lastScanned.checkInTime && (
+                  <div className="md:col-span-2">
+                    <p className="text-muted-foreground">Check-in Time</p>
+                    <p className="font-medium">{new Date(lastScanned.checkInTime).toLocaleString()}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

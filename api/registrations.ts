@@ -33,7 +33,8 @@ const registrationSchema = new mongoose.Schema({
   gstin: String,
   pan: String,
   referralCode: String,
-  qrCode: String
+  qrCode: String,
+  deleted: { type: Boolean, default: false }
 });
 
 const Registration = mongoose.models.Registration || mongoose.model('Registration', registrationSchema);
@@ -60,23 +61,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Get admin token from request headers for authentication
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
+    if (!authHeader || authHeader !== 'Bearer admin123') {
       return res.status(401).json({
         success: false,
-        error: 'Authentication required'
+        error: 'Unauthorized: Invalid admin credentials'
       });
     }
 
-    // In a real implementation, verify the admin token
-    // For now, we'll accept any token for development
-
-    const registrations = await Registration.find({})
+    const registrations = await Registration.find({ deleted: { $ne: true } })
       .sort({ registrationDate: -1 })
       .lean();
 
+    // Convert _id to string to ensure proper serialization
+    const formattedRegistrations = registrations.map(reg => ({
+      ...reg,
+      _id: reg._id.toString(),
+      id: reg._id.toString()
+    }));
+
     return res.status(200).json({
       success: true,
-      data: registrations,
+      data: formattedRegistrations,
       message: 'Registrations retrieved successfully'
     });
 
