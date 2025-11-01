@@ -31,6 +31,13 @@ const Staff = () => {
       toast.error("Please enter staff key");
       return;
     }
+    
+    // Check staff password
+    if (staffKey !== "influencia2025@ncas") {
+      toast.error("Invalid staff password");
+      return;
+    }
+    
     setIsAuthenticated(true);
     toast.success("Staff access granted");
   };
