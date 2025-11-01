@@ -60,15 +60,23 @@ module.exports = async function handler(req, res) {
 
     await connectDB();
     
-    const { attendeeId } = req.query;
+    // Try to get attendeeId from both query and params (for Express compatibility)
+    const attendeeId = req.query.attendeeId || req.params?.attendeeId;
     
+    console.log('========================================');
     console.log('Attendee handler - Method:', req.method);
+    console.log('Attendee handler - URL:', req.url);
     console.log('Attendee handler - Query:', req.query);
     console.log('Attendee handler - Params:', req.params);
-    console.log('Attendee handler - attendeeId:', attendeeId);
+    console.log('Attendee handler - Body:', req.body);
+    console.log('Attendee handler - attendeeId (extracted):', attendeeId);
+    console.log('========================================');
     
     if (!attendeeId) {
-      console.error('Missing attendeeId! Query:', req.query, 'Params:', req.params);
+      console.error('❌ Missing attendeeId!');
+      console.error('Query:', JSON.stringify(req.query, null, 2));
+      console.error('Params:', JSON.stringify(req.params, null, 2));
+      console.error('Body:', JSON.stringify(req.body, null, 2));
       return res.status(400).json({
         success: false,
         error: 'Attendee ID is required'
@@ -76,13 +84,34 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      // Update attendee status (check-in, etc.)
-      const { attended, checkInTime, deleted } = req.body;
+      // Update attendee status (check-in, payment, etc.)
+      const { 
+        attended, checkInTime, deleted, paymentStatus,
+        name, fullName, email, phone, contactNumber,
+        business, organization, designation, dateOfBirth,
+        sectors, experience, achievements, futurePlan
+      } = req.body;
       
       const updateData = {};
       if (attended !== undefined) updateData.attended = attended;
       if (checkInTime) updateData.checkInTime = new Date(checkInTime);
       if (deleted !== undefined) updateData.deleted = deleted;
+      if (paymentStatus) updateData.paymentStatus = paymentStatus;
+      
+      // Personal and professional fields
+      if (name) updateData.name = name;
+      if (fullName) updateData.fullName = fullName;
+      if (email) updateData.email = email;
+      if (phone) updateData.phone = phone;
+      if (contactNumber) updateData.contactNumber = contactNumber;
+      if (business) updateData.business = business;
+      if (organization) updateData.organization = organization;
+      if (designation) updateData.designation = designation;
+      if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
+      if (sectors) updateData.sectors = sectors;
+      if (experience) updateData.experience = experience;
+      if (achievements) updateData.achievements = achievements;
+      if (futurePlan) updateData.futurePlan = futurePlan;
       
       const updatedRegistration = await Registration.findByIdAndUpdate(
         attendeeId,

@@ -22,16 +22,27 @@ app.get('/api/registrations', registrationsHandler);
 
 // Attendee routes - support both PUT and DELETE
 app.put('/api/attendees/:attendeeId', (req, res, next) => {
-  console.log('PUT /api/attendees - params:', req.params);
-  console.log('PUT /api/attendees - query before:', req.query);
+  console.log('\n========== PUT /api/attendees ==========');
+  console.log('Original URL:', req.originalUrl);
+  console.log('URL:', req.url);
+  console.log('Params:', req.params);
+  console.log('Query before:', req.query);
+  console.log('Body:', req.body);
+  
+  // Set the query parameter from the URL param
   req.query = { ...req.query, attendeeId: req.params.attendeeId };
-  console.log('PUT /api/attendees - query after:', req.query);
+  
+  console.log('Query after:', req.query);
+  console.log('==========================================\n');
+  
   attendeesHandler(req, res);
 });
 
 app.delete('/api/attendees/:attendeeId', (req, res, next) => {
-  console.log('DELETE /api/attendees - params:', req.params);
+  console.log('\n========== DELETE /api/attendees ==========');
+  console.log('Params:', req.params);
   req.query = { ...req.query, attendeeId: req.params.attendeeId };
+  console.log('==========================================\n');
   attendeesHandler(req, res);
 });
 

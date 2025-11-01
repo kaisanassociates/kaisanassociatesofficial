@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Search, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Search, Trash2, CheckCircle, XCircle, DollarSign, Eye, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import kaisanLogo from "@/assets/kaisan-logo.png";
 
 const Admin = () => {
@@ -13,6 +21,10 @@ const Admin = () => {
   const [adminKey, setAdminKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAttendee, setSelectedAttendee] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedAttendee, setEditedAttendee] = useState<any>(null);
 
   const handleLogin = async () => {
     if (!adminKey.trim()) {
@@ -45,7 +57,7 @@ const Admin = () => {
     } catch (error) {
       toast.error("Invalid admin key");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   };
 
@@ -85,6 +97,91 @@ const Admin = () => {
       }
     } catch (error) {
       toast.error("Failed to update attendance");
+    }
+  };
+
+  const handleConfirmPayment = async (id: string) => {
+    try {
+      const response = await fetch(`/api/attendees/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`
+        },
+        body: JSON.stringify({ paymentStatus: 'confirmed' })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        const updated = attendees.map((a) => 
+          a._id === id ? { ...a, paymentStatus: 'confirmed' } : a
+        );
+        setAttendees(updated);
+        setFilteredAttendees(updated);
+        toast.success('Payment confirmed successfully');
+      } else {
+        throw new Error(result.error || 'Failed to confirm payment');
+      }
+    } catch (error) {
+      toast.error("Failed to confirm payment");
+    }
+  };
+
+  const handleViewAttendee = (attendee: any) => {
+    setSelectedAttendee(attendee);
+    setEditedAttendee({ ...attendee });
+    setIsEditMode(false);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditAttendee = () => {
+    setIsEditMode(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editedAttendee) return;
+    
+    try {
+      const response = await fetch(`/api/attendees/${editedAttendee._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`
+        },
+        body: JSON.stringify({
+          name: editedAttendee.fullName || editedAttendee.name,
+          fullName: editedAttendee.fullName,
+          email: editedAttendee.email,
+          phone: editedAttendee.contactNumber || editedAttendee.phone,
+          contactNumber: editedAttendee.contactNumber,
+          business: editedAttendee.business,
+          organization: editedAttendee.organization,
+          designation: editedAttendee.designation,
+          dateOfBirth: editedAttendee.dateOfBirth,
+          sectors: editedAttendee.sectors,
+          experience: editedAttendee.experience,
+          achievements: editedAttendee.achievements,
+          futurePlan: editedAttendee.futurePlan
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        const updated = attendees.map((a) => 
+          a._id === editedAttendee._id ? result.data : a
+        );
+        setAttendees(updated);
+        setFilteredAttendees(updated);
+        setSelectedAttendee(result.data);
+        setIsEditMode(false);
+        toast.success('Attendee updated successfully');
+      } else {
+        throw new Error(result.error || 'Failed to update attendee');
+      }
+    } catch (error) {
+      toast.error("Failed to update attendee");
     }
   };
 
@@ -196,7 +293,8 @@ const Admin = () => {
                   <th className="px-4 py-4 text-left text-sm font-semibold">Name</th>
                   <th className="px-4 py-4 text-left text-sm font-semibold hidden md:table-cell">Email</th>
                   <th className="px-4 py-4 text-left text-sm font-semibold hidden lg:table-cell">Phone</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold">Status</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Payment</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Attendance</th>
                   <th className="px-4 py-4 text-left text-sm font-semibold">Actions</th>
                 </tr>
               </thead>
@@ -211,6 +309,19 @@ const Admin = () => {
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground hidden md:table-cell">{attendee.email}</td>
                     <td className="px-4 py-4 text-sm text-muted-foreground hidden lg:table-cell">{attendee.phone}</td>
+                    <td className="px-4 py-4">
+                      {attendee.paymentStatus === 'confirmed' ? (
+                        <span className="inline-flex items-center gap-1 text-green-500 text-sm">
+                          <DollarSign className="w-4 h-4" />
+                          Confirmed
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-yellow-500 text-sm">
+                          <DollarSign className="w-4 h-4" />
+                          Pending
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-4">
                       {attendee.attended ? (
                         <span className="inline-flex items-center gap-1 text-green-500 text-sm">
@@ -229,8 +340,29 @@ const Admin = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleViewAttendee(attendee)}
+                          className="text-blue-500 hover:text-blue-600"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {attendee.paymentStatus !== 'confirmed' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleConfirmPayment(attendee._id)}
+                            className="text-green-500 hover:text-green-600"
+                            title="Confirm Payment"
+                          >
+                            <DollarSign className="w-4 h-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleToggleAttendance(attendee._id)}
                           className={attendee.attended ? "text-yellow-500 hover:text-yellow-600" : "text-green-500 hover:text-green-600"}
+                          title={attendee.attended ? "Unmark Attendance" : "Mark Attendance"}
                         >
                           {attendee.attended ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                         </Button>
@@ -239,6 +371,7 @@ const Admin = () => {
                           size="sm"
                           onClick={() => handleDelete(attendee._id)}
                           className="text-destructive hover:text-destructive"
+                          title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -250,6 +383,207 @@ const Admin = () => {
             </table>
           </div>
         </div>
+
+        {/* View/Edit Attendee Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>{isEditMode ? 'Edit' : 'View'} Attendee Details</span>
+                {!isEditMode && (
+                  <Button variant="outline" size="sm" onClick={handleEditAttendee}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+              </DialogTitle>
+              <DialogDescription>
+                {isEditMode ? 'Update attendee information below' : 'Complete registration details'}
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedAttendee && editedAttendee && (
+              <div className="space-y-6 py-4">
+                {/* Personal Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Full Name</Label>
+                      {isEditMode ? (
+                        <Input
+                          value={editedAttendee.fullName || editedAttendee.name || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, fullName: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.fullName || selectedAttendee.name}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      {isEditMode ? (
+                        <Input
+                          type="email"
+                          value={editedAttendee.email || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, email: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.email}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Contact Number</Label>
+                      {isEditMode ? (
+                        <Input
+                          value={editedAttendee.contactNumber || editedAttendee.phone || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, contactNumber: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.contactNumber || selectedAttendee.phone}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Date of Birth</Label>
+                      {isEditMode ? (
+                        <Input
+                          type="date"
+                          value={editedAttendee.dateOfBirth || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, dateOfBirth: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.dateOfBirth || 'N/A'}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Professional Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Professional Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Business/Organization</Label>
+                      {isEditMode ? (
+                        <Input
+                          value={editedAttendee.business || editedAttendee.organization || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, business: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.business || selectedAttendee.organization || 'N/A'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Designation</Label>
+                      {isEditMode ? (
+                        <Input
+                          value={editedAttendee.designation || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, designation: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.designation || 'N/A'}</p>
+                      )}
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label>Sectors</Label>
+                      <p className="mt-1 text-sm">
+                        {selectedAttendee.sectors?.join(', ') || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label>Experience</Label>
+                      {isEditMode ? (
+                        <Input
+                          value={editedAttendee.experience || ''}
+                          onChange={(e) => setEditedAttendee({...editedAttendee, experience: e.target.value})}
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedAttendee.experience || 'N/A'}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Additional Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Achievements</Label>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{selectedAttendee.achievements || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <Label>Future Plans</Label>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{selectedAttendee.futurePlan || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Registration Details */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Registration Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>QR Code</Label>
+                      <p className="mt-1 text-sm font-mono">{selectedAttendee.qrCode}</p>
+                    </div>
+                    <div>
+                      <Label>Registration Date</Label>
+                      <p className="mt-1 text-sm">
+                        {selectedAttendee.registrationDate ? new Date(selectedAttendee.registrationDate).toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label>Payment Status</Label>
+                      <p className={`mt-1 text-sm font-semibold ${
+                        selectedAttendee.paymentStatus === 'confirmed' ? 'text-green-500' : 'text-yellow-500'
+                      }`}>
+                        {selectedAttendee.paymentStatus || 'pending'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label>Attendance Status</Label>
+                      <p className={`mt-1 text-sm font-semibold ${
+                        selectedAttendee.attended ? 'text-green-500' : 'text-yellow-500'
+                      }`}>
+                        {selectedAttendee.attended ? 'Attended' : 'Not Attended'}
+                      </p>
+                    </div>
+                    {selectedAttendee.checkInTime && (
+                      <div>
+                        <Label>Check-in Time</Label>
+                        <p className="mt-1 text-sm">
+                          {new Date(selectedAttendee.checkInTime).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                {isEditMode && (
+                  <div className="flex gap-2 justify-end pt-4 border-t">
+                    <Button variant="outline" onClick={() => {
+                      setIsEditMode(false);
+                      setEditedAttendee({...selectedAttendee});
+                    }}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveEdit}>
+                      Save Changes
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

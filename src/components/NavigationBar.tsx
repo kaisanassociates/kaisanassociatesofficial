@@ -47,9 +47,9 @@ const NavigationBar = () => {
           : 'bg-background/80 backdrop-blur-md border-b border-border/30'
       }`}>
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between lg:justify-center lg:gap-8">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-3 group lg:absolute lg:left-4">
               <img 
                 src={kaisanLogo} 
                 alt="Kaisan Associates" 
@@ -57,8 +57,8 @@ const NavigationBar = () => {
               />
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex items-center justify-center space-x-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -91,18 +91,18 @@ const NavigationBar = () => {
                   )
                 );
               })}
-              
-              {/* Contact Buttons */}
-              <div className="flex items-center space-x-1 ml-4 pl-4 border-l border-border/50">
-                <a href="tel:+918589990060" className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
-                  <Phone className="h-4 w-4" />
-                  <span className="hidden xl:inline">+91 858 999 00 60</span>
-                </a>
-                <a href="mailto:info@kaisanassociates.com" className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
-                  <Mail className="h-4 w-4" />
-                  <span className="hidden xl:inline">Email</span>
-                </a>
-              </div>
+            </div>
+            
+            {/* Contact Buttons - Right Side */}
+            <div className="hidden lg:flex items-center space-x-1 lg:absolute lg:right-4">
+              <a href="tel:+918589990060" className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
+                <Phone className="h-4 w-4" />
+                <span className="hidden xl:inline">+91 858 999 00 60</span>
+              </a>
+              <a href="mailto:info@kaisanassociates.com" className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200">
+                <Mail className="h-4 w-4" />
+                <span className="hidden xl:inline">Email</span>
+              </a>
             </div>
 
             {/* Mobile Menu Button */}

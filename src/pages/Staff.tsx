@@ -37,6 +37,12 @@ const Staff = () => {
 
   const startCamera = async () => {
     try {
+      // Set scan mode first to render the div
+      setScanMode('camera');
+      
+      // Wait for DOM to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const html5QrCode = new Html5Qrcode("qr-reader");
       html5QrCodeRef.current = html5QrCode;
       
@@ -57,11 +63,11 @@ const Staff = () => {
       );
       
       setIsCameraActive(true);
-      setScanMode('camera');
       toast.success("Camera started");
     } catch (err) {
       console.error("Error starting camera:", err);
       toast.error("Failed to start camera. Please check permissions.");
+      setScanMode('manual');
     }
   };
 
@@ -127,9 +133,13 @@ const Staff = () => {
         attendeeId = attendeeId.$oid;
       }
       
+      console.log('🔍 Attendee found:', attendee);
+      console.log('🆔 Extracted attendeeId:', attendeeId);
+      console.log('🆔 Type of attendeeId:', typeof attendeeId);
+      
       if (!attendeeId) {
         toast.error("Invalid attendee data - ID missing");
-        console.error('Attendee object:', attendee);
+        console.error('❌ Attendee object:', attendee);
         setIsScanning(false);
         setQrCode("");
         return;
@@ -142,6 +152,8 @@ const Staff = () => {
         setIsScanning(false);
         return;
       }
+      
+      console.log('📡 About to call PUT /api/attendees/' + attendeeId);
       
       // Mark attendance
       const updateResponse = await fetch(`/api/attendees/${attendeeId}`, {

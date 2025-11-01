@@ -12,6 +12,28 @@ const registrationSchema = new mongoose.Schema({
   registrationDate: { type: Date, default: Date.now },
   attended: { type: Boolean, default: false },
   checkInTime: Date,
+  deleted: { type: Boolean, default: false },
+  // Extended fields
+  fullName: String,
+  contactNumber: String,
+  business: String,
+  sectors: [String],
+  designation: String,
+  experience: String,
+  achievements: String,
+  futurePlan: String,
+  dateOfBirth: String,
+  linkedinProfile: String,
+  otherSector: String,
+  address: String,
+  city: String,
+  state: String,
+  pincode: String,
+  country: String,
+  website: String,
+  gstin: String,
+  pan: String,
+  referralCode: String,
   qrCode: String
 });
 
@@ -37,8 +59,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await connectDB();
     
-    const { attendeeId } = req.query;
-    const { action } = req.body;
+    // Try to get attendeeId from both query and params (for compatibility)
+    const attendeeId = (req.query.attendeeId || (req as any).params?.attendeeId) as string;
+    const { 
+      action, attended, checkInTime, deleted, paymentStatus,
+      name, fullName, email, phone, contactNumber,
+      business, organization, designation, dateOfBirth,
+      sectors, experience, achievements, futurePlan
+    } = req.body;
     
     if (!attendeeId || typeof attendeeId !== 'string') {
       return res.status(400).json({
@@ -49,15 +77,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Get admin token from request headers for authentication
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
+    if (!authHeader || authHeader !== 'Bearer admin123') {
       return res.status(401).json({
         success: false,
-        error: 'Authentication required'
+        error: 'Unauthorized: Invalid admin credentials'
       });
     }
-
-    // In a real implementation, verify the admin token
-    // For now, we'll accept any token for development
 
     const registration = await Registration.findById(attendeeId);
     
@@ -68,6 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Handle different update operations
     if (action === 'toggle_attendance') {
       registration.attended = !registration.attended;
       if (registration.attended) {
@@ -79,6 +105,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await Registration.findByIdAndDelete(attendeeId);
       return res.status(200).json({
         success: true,
+        message: 'Attendee deleted successfully'
+      });
+    } else {
+      // Direct field updates
+      if (attended !== undefined) registration.attended = attended;
+      if (checkInTime) registration.checkInTime = new Date(checkInTime);
+      if (deleted !== undefined) registration.deleted = deleted;
+      if (paymentStatus) registration.paymentStatus = paymentStatus;
+      
+      // Personal and professional fields
+      if (name) registration.name = name;
+      if (fullName) registration.fullName = fullName;
+      if (email) registration.email = email;
+      if (phone) registration.phone = phone;
+      if (contactNumber) registration.contactNumber = contactNumber;
+      if (business) registration.business = business;
+      if (organization) registration.organization = organization;
+      if (designation) registration.designation = designation;
+      if (dateOfBirth) registration.dateOfBirth = dateOfBirth;
+      if (sectors) registration.sectors = sectors;
+      if (experience) registration.experience = experience;
+      if (achievements) registration.achievements = achievements;
+      if (futurePlan) registration.futurePlan = futurePlan;
+    }
+
+    await registration.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Attendee updated successfully',
+      data: registration
+    });
         message: 'Attendee deleted successfully'
       });
     } else {

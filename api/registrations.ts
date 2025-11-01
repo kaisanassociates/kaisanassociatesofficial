@@ -73,7 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .lean();
 
     // Convert _id to string to ensure proper serialization
-    const formattedRegistrations = registrations.map(reg => ({
+    const formattedRegistrations = registrations.map((reg: any) => ({
       ...reg,
       _id: reg._id.toString(),
       id: reg._id.toString()
