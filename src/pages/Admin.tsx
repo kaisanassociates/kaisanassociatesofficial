@@ -399,11 +399,11 @@ const Admin = () => {
                 className="pl-10"
               />
             </div>
-            <Button onClick={handleExportCSV} className="h-12 md:h-10">
+            <Button onClick={handleExportCSV} variant="outline" className="h-12 md:h-10 rounded-full">
               <FileDown className="w-4 h-4 mr-2" />
               Export to CSV
             </Button>
-            <Button onClick={handleExportExcel} className="h-12 md:h-10">
+            <Button onClick={handleExportExcel} variant="outline" className="h-12 md:h-10 rounded-full">
               <FileDown className="w-4 h-4 mr-2" />
               Export to Excel
             </Button>
@@ -463,39 +463,39 @@ const Admin = () => {
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon"
                           onClick={() => handleViewAttendee(attendee)}
-                          className="text-blue-500 hover:text-blue-600"
+                          className="h-9 w-9 rounded-full"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         {attendee.paymentStatus !== 'confirmed' && (
                           <Button
-                            variant="ghost"
-                            size="sm"
+                            variant="outline"
+                            size="icon"
                             onClick={() => handleConfirmPayment(attendee._id)}
-                            className="text-green-500 hover:text-green-600"
+                            className="h-9 w-9 rounded-full"
                             title="Confirm Payment"
                           >
                             <DollarSign className="w-4 h-4" />
                           </Button>
                         )}
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon"
                           onClick={() => handleToggleAttendance(attendee._id)}
-                          className={attendee.attended ? "text-yellow-500 hover:text-yellow-600" : "text-green-500 hover:text-green-600"}
+                          className="h-9 w-9 rounded-full"
                           title={attendee.attended ? "Unmark Attendance" : "Mark Attendance"}
                         >
                           {attendee.attended ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon"
                           onClick={() => handleDelete(attendee._id)}
-                          className="text-destructive hover:text-destructive"
+                          className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />

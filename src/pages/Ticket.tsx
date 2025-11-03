@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { Download, ArrowLeft, Calendar, MapPin, Mail, Phone, User, Building, CheckCircle, Clock } from "lucide-react";
+import { Download, ArrowLeft, Calendar, MapPin, Mail, Phone, User, Building, CheckCircle, Clock, DollarSign, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Attendee } from "@/lib/api";
 import kaisanLogo from "@/assets/kaisan-logo.png";
+import { toast } from "sonner";
 
 const Ticket = () => {
   const [attendee, setAttendee] = useState<Attendee | null>(null);
@@ -172,6 +173,16 @@ const Ticket = () => {
     }
   };
 
+  const handlePayNow = () => {
+    const url = (import.meta as any)?.env?.VITE_PAYMENT_URL || "";
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      toast.info("Payment link will be shared shortly. For assistance, contact info@kaisanassociates.com");
+      window.location.href = "mailto:info@kaisanassociates.com?subject=Influ%C3%AAncia%20Payment%20Assistance&body=Hi%20Team%2C%20please%20help%20me%20complete%20my%20payment.%20My%20E-Pass%20ID%3A%20" + encodeURIComponent(attendee.qrCode);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8 md:py-12 px-4">
       <div className="container mx-auto max-w-5xl">
@@ -212,6 +223,37 @@ const Ticket = () => {
           </div>
 
           <div className="p-8 md:p-12">
+            {/* Payment encouragement card (shows only when payment is pending) */}
+            {attendee.paymentStatus !== 'confirmed' && (
+              <div className="mb-8 rounded-2xl border border-yellow-300/60 bg-yellow-50 p-5 md:p-6 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-full bg-yellow-200 p-2 text-yellow-700">
+                      <DollarSign className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm md:text-base font-semibold uppercase text-yellow-800">Payment Pending — Complete to Confirm Your Seat</h3>
+                      <p className="text-xs md:text-sm text-yellow-700/90 mt-1">
+                        Finish your payment now to unlock fast entry, priority seating, and bonus resources.
+                      </p>
+                      <ul className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] md:text-xs text-yellow-800/90">
+                        <li className="inline-flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5" /> Guaranteed seat</li>
+                        <li className="inline-flex items-center gap-2"><Zap className="w-3.5 h-3.5" /> Fast-track entry</li>
+                        <li className="inline-flex items-center gap-2"><CheckCircle className="w-3.5 h-3.5" /> Bonus resources</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button onClick={handlePayNow} className="h-10 md:h-11 px-5 md:px-6 font-semibold uppercase bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full">
+                      <DollarSign className="w-4 h-4 mr-2" /> Pay Now
+                    </Button>
+                    <Button variant="outline" className="h-10 md:h-11 px-4 rounded-full uppercase text-xs md:text-sm" asChild>
+                      <a href="mailto:info@kaisanassociates.com?subject=Payment%20Help%20-%20Influ%C3%AAncia" target="_blank" rel="noreferrer">Need help?</a>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid md:grid-cols-[1.5fr,1fr] gap-8 md:gap-12">
               <div className="space-y-8">
                 <div className="space-y-2">
