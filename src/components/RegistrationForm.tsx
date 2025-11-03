@@ -78,19 +78,6 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
   const {
     register,
     handleSubmit,

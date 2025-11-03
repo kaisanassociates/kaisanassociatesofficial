@@ -2,16 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { 
   Sparkles, Zap, Users, Trophy, Rocket, Brain, 
   TrendingUp, Star, Award, Target, CheckCircle, 
-  ChevronRight, Flame, Crown, ArrowRight, ChevronLeft, ChevronDown
+  ChevronRight, Flame, Crown, ArrowRight, ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 // Import Dr. Rashid's image
 import drRashidImage from "@/assets/dr-rashid-speaking.jpg";
 
 const AboutInfluencia = () => {
-  const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -19,122 +17,19 @@ const AboutInfluencia = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [hasEntered, setHasEntered] = useState(false);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [showCountdown, setShowCountdown] = useState(false);
-  const [countdown, setCountdown] = useState(5);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
-  const ctaSectionRef = useRef<HTMLDivElement>(null);
-  const hasTriggeredNavRef = useRef(false);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const cancelNavigation = () => {
-    setShowCountdown(false);
-    setCountdown(5);
-    setIsNavigating(false);
-    hasTriggeredNavRef.current = false;
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    if (navigationTimeoutRef.current) {
-      clearTimeout(navigationTimeoutRef.current);
-      navigationTimeoutRef.current = null;
-    }
-  };
-
-  const startCountdown = () => {
-    setShowCountdown(true);
-    setCountdown(5);
-    
-    let count = 5;
-    countdownIntervalRef.current = setInterval(() => {
-      count -= 1;
-      setCountdown(count);
-      
-      if (count <= 0) {
-        if (countdownIntervalRef.current) {
-          clearInterval(countdownIntervalRef.current);
-        }
-      }
-    }, 1000);
-
-    // Navigate after 5 seconds
-    navigationTimeoutRef.current = setTimeout(() => {
-      setIsNavigating(true);
-      
-      // Simple fade out
-      if (ctaSectionRef.current) {
-        ctaSectionRef.current.style.transition = 'opacity 0.5s ease-out';
-        ctaSectionRef.current.style.opacity = '0';
-      }
-
-      // Navigate to register
-      setTimeout(() => {
-        navigate('/', { state: { openRegistration: true } });
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }, 500);
-    }, 5000);
-  };
+  
+  // Carousel timing configuration
+  const TRANSITION_MS = 2000; // animation duration per slide
+  const AUTO_INTERVAL_MS = 2000; // time between slide switches
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    
-    // Trigger entrance animation
-    setTimeout(() => {
-      setIsVisible(true);
-      setHasEntered(true);
-    }, 100);
-    
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      cancelNavigation();
-    };
-  }, [navigate, showCountdown]);
-
-  // IntersectionObserver on CTA section for reliable trigger/cancel
-  useEffect(() => {
-    if (!ctaSectionRef.current) return;
-    const el = ctaSectionRef.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-
-        // Show indicator when section becomes significantly visible
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6 && !showCountdown && !hasTriggeredNavRef.current) {
-          setShowScrollIndicator(true);
-        } else if (!showCountdown) {
-          setShowScrollIndicator(false);
-        }
-
-        // Start countdown when intersecting enough
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6 && !showCountdown && !hasTriggeredNavRef.current) {
-          hasTriggeredNavRef.current = true;
-          startCountdown();
-        }
-
-        // Cancel or reset when leaving viewport
-        if (!entry.isIntersecting) {
-          if (showCountdown) {
-            cancelNavigation();
-          } else {
-            hasTriggeredNavRef.current = false;
-          }
-        }
-      },
-      { root: null, threshold: [0, 0.25, 0.5, 0.6, 0.75, 1] }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [showCountdown]);
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    setIsVisible(true);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const eventImages = [
     { 
@@ -184,17 +79,17 @@ const AboutInfluencia = () => {
       clearInterval(autoPlayRef.current);
     }
     autoPlayRef.current = setInterval(() => {
-      if (!isDragging && !isTransitioning) {
+      if (!isDragging) {
         goToNextSlide();
       }
-    }, 6000);
+    }, AUTO_INTERVAL_MS);
   };
 
   const goToNextSlide = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrentSlide((prev) => (prev + 1) % eventImages.length);
-    setTimeout(() => setIsTransitioning(false), 700);
+    setTimeout(() => setIsTransitioning(false), TRANSITION_MS);
     resetAutoPlay();
   };
 
@@ -202,7 +97,7 @@ const AboutInfluencia = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrentSlide((prev) => (prev - 1 + eventImages.length) % eventImages.length);
-    setTimeout(() => setIsTransitioning(false), 700);
+    setTimeout(() => setIsTransitioning(false), TRANSITION_MS);
     resetAutoPlay();
   };
 
@@ -210,7 +105,7 @@ const AboutInfluencia = () => {
     if (isTransitioning || index === currentSlide) return;
     setIsTransitioning(true);
     setCurrentSlide(index);
-    setTimeout(() => setIsTransitioning(false), 700);
+    setTimeout(() => setIsTransitioning(false), TRANSITION_MS);
     resetAutoPlay();
   };
 
@@ -311,26 +206,6 @@ const AboutInfluencia = () => {
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-white">
-      {/* Page entrance overlay */}
-      <div 
-        className={`fixed inset-0 bg-gradient-to-br from-red-600 via-rose-600 to-red-700 z-50 pointer-events-none transition-all duration-1000 ${
-          hasEntered ? 'opacity-0' : 'opacity-100'
-        }`}
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className={`transition-all duration-1000 ${
-            hasEntered ? 'scale-150 opacity-0' : 'scale-100 opacity-100'
-          }`}>
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/20 rounded-full blur-3xl animate-pulse" />
-              <h2 className="relative text-6xl md:text-8xl font-black text-white tracking-tight">
-                INFLUENCIA
-              </h2>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Animated Background */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Red gradient orbs */}
@@ -632,7 +507,7 @@ const AboutInfluencia = () => {
                   return (
                     <div
                       key={index}
-                      className="absolute top-1/2 left-1/2 transition-all duration-700 ease-out cursor-pointer"
+                      className="absolute top-1/2 left-1/2 transition-all duration-[2000ms] ease-out cursor-pointer"
                       style={{
                         transform: `translate(-50%, -50%) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                         opacity: isVisible ? opacity : 0,
@@ -877,7 +752,7 @@ const AboutInfluencia = () => {
         </div>
 
         {/* Final CTA Section */}
-        <div ref={ctaSectionRef} className="max-w-5xl mx-auto text-center space-y-8 relative">
+        <div className="max-w-5xl mx-auto text-center space-y-8">
           <div className="relative inline-block">
             <Zap className="absolute -top-8 -left-8 w-16 h-16 text-red-500 animate-bounce" />
             <Zap className="absolute -bottom-8 -right-8 w-16 h-16 text-rose-500 animate-bounce" style={{ animationDelay: "0.5s" }} />
@@ -894,10 +769,7 @@ const AboutInfluencia = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
             <Button
-              onClick={() => {
-                navigate('/', { state: { openRegistration: true } });
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               size="lg"
               className="group px-12 py-8 text-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full shadow-2xl hover:shadow-red-500/50 transition-all duration-500 hover:scale-110"
             >
@@ -923,29 +795,6 @@ const AboutInfluencia = () => {
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <span>Money-Back Guarantee</span>
-            </div>
-          </div>
-
-          {/* Scroll to Register Indicator */}
-          <div 
-            className={`absolute -bottom-32 left-1/2 -translate-x-1/2 transition-all duration-500 ${
-              showScrollIndicator && !isNavigating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}
-          >
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-sm font-semibold text-gray-600 tracking-wider uppercase">
-                Continue to Register
-              </span>
-              <div className="relative">
-                {/* Animated circle background */}
-                <div className="absolute inset-0 w-12 h-12 rounded-full bg-red-500/20 animate-ping" />
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-red-500/30 to-rose-500/30 backdrop-blur-sm border-2 border-red-500/50 flex items-center justify-center">
-                  <ChevronDown className="w-6 h-6 text-red-600 animate-bounce" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-500">
-                Scroll down to complete registration
-              </div>
             </div>
           </div>
         </div>
@@ -1000,73 +849,6 @@ const AboutInfluencia = () => {
           }
         }
       `}} />
-
-      {/* Countdown Navigation Indicator */}
-      <div 
-        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
-          showCountdown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'
-        }`}
-      >
-        <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 md:px-8 py-3 md:py-4 rounded-2xl shadow-2xl border-2 border-white/20 backdrop-blur-xl max-w-[95vw] md:max-w-none">
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="relative flex items-center justify-center flex-shrink-0">
-              <svg className="w-12 h-12 md:w-16 md:h-16 transform -rotate-90">
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="20"
-                  stroke="rgba(255,255,255,0.2)"
-                  strokeWidth="3"
-                  fill="none"
-                  className="md:hidden"
-                />
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="20"
-                  stroke="white"
-                  strokeWidth="3"
-                  fill="none"
-                  strokeDasharray={`${(countdown / 5) * 125.66} 125.66`}
-                  className="transition-all duration-1000 ease-linear md:hidden"
-                />
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="rgba(255,255,255,0.2)"
-                  strokeWidth="4"
-                  fill="none"
-                  className="hidden md:block"
-                />
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="white"
-                  strokeWidth="4"
-                  fill="none"
-                  strokeDasharray={`${(countdown / 5) * 175.93} 175.93`}
-                  className="transition-all duration-1000 ease-linear hidden md:block"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl md:text-3xl font-black">{countdown}</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-0.5 md:gap-1 min-w-0">
-              <p className="text-sm md:text-lg font-bold truncate">Opening Registration...</p>
-              <p className="text-xs md:text-sm text-white/80">Scroll up to cancel</p>
-            </div>
-            <button
-              onClick={cancelNavigation}
-              className="ml-2 md:ml-4 px-3 md:px-4 py-1.5 md:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm md:text-base font-semibold transition-all duration-200 hover:scale-105 flex-shrink-0"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
     </section>
   );
 };
