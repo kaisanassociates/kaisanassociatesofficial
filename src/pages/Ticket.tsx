@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { Download, ArrowLeft, Calendar, MapPin, Mail, Phone, User, Building, CheckCircle, Clock } from "lucide-react";
+import { Download, ArrowLeft, Calendar, MapPin, Mail, Phone, User, Building, CheckCircle, Clock, CreditCard, AlertTriangle, Zap, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Attendee } from "@/lib/api";
 import kaisanLogo from "@/assets/kaisan-logo.png";
@@ -97,9 +97,11 @@ const Ticket = () => {
             .svalue.ok { color:#16a34a; }
             .svalue.wait { color:#a16207; }
             .instructions { margin-top: 14px; background: #fdeef2; border:1px solid #f5d0dc; border-radius: 10px; padding: 14px; }
+            .instructions.pending { background: #fef3c7; border:1px solid #fbbf24; }
             .instructions h3 { margin:0 0 8px; font-size: 12px; text-transform: uppercase; }
             .instructions ul { margin:0; padding-left: 16px; }
             .instructions li { font-size: 10px; text-transform: uppercase; color:#374151; margin: 4px 0; }
+            .instructions li.warning { color:#d97706; font-weight: 700; }
             .footer { text-align:center; font-size: 9px; color:#111; padding: 10px 12px; border-top:1px solid #e5e7eb; text-transform: uppercase; }
           </style>
         </head>
@@ -143,13 +145,15 @@ const Ticket = () => {
                 <div class="sitem"><div class="slabel">Payment</div><div class="svalue ${attendee.paymentStatus==='confirmed'?'ok':'wait'}">${attendee.paymentStatus==='confirmed'?'✓ CONFIRMED':'⏳ PENDING'}</div></div>
                 <div class="sitem"><div class="slabel">Checked In</div><div class="svalue ${attendee.attended?'ok':'wait'}">${attendee.attended ? (attendee.checkInTime ? new Date(attendee.checkInTime).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).toUpperCase() : '✓ CHECKED IN'): 'AWAITING'}</div></div>
               </div>
-              <div class="instructions">
+              <div class="instructions ${attendee.paymentStatus === 'pending' ? 'pending' : ''}">
                 <h3>Important Instructions</h3>
                 <ul>
+                  ${attendee.paymentStatus === 'pending' ? '<li class="warning">⚠️ Complete your payment to secure your spot at the event</li>' : ''}
                   <li>This e-pass is valid for one person only and non-transferable</li>
                   <li>Please carry a valid photo ID along with this e-pass</li>
                   <li>Entry will be allowed only after QR code verification</li>
                   <li>Please arrive 30 minutes before the event starts</li>
+                  ${attendee.paymentStatus === 'pending' ? '<li class="warning">💳 Contact support for payment: +91 81294 24700</li>' : ''}
                 </ul>
               </div>
             </div>
@@ -173,7 +177,9 @@ const Ticket = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8 md:py-12 px-4">
+    <div className={`min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8 md:py-12 px-4 ${
+      attendee.paymentStatus === 'pending' ? 'pb-24' : ''
+    }`}>
       <div className="container mx-auto max-w-5xl">
         <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors print:hidden">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -210,6 +216,62 @@ const Ticket = () => {
               </div>
             </div>
           </div>
+
+          {/* Payment Encouragement Section - Only show for pending payments */}
+          {attendee.paymentStatus === 'pending' && (
+            <div className="bg-gradient-to-r from-yellow-50 via-amber-50 to-orange-50 border-l-4 border-yellow-400 p-6 m-6 rounded-lg shadow-lg animate-pulse">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
+                    <CreditCard className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                    <h3 className="text-lg font-bold text-yellow-800 uppercase tracking-wide">Payment Required</h3>
+                  </div>
+                  <p className="text-yellow-700 font-medium">
+                    Complete your registration payment to secure your spot at INFLUENCIA Edition 2.0!
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div className="flex items-center gap-2 text-sm text-yellow-700">
+                      <Zap className="w-4 h-4 text-yellow-600" />
+                      <span className="font-medium">INSTANT CONFIRMATION</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-yellow-700">
+                      <ShieldCheck className="w-4 h-4 text-yellow-600" />
+                      <span className="font-medium">SECURE PAYMENT</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-yellow-700">
+                      <CheckCircle className="w-4 h-4 text-yellow-600" />
+                      <span className="font-medium">GUARANTEED ENTRY</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                    <button 
+                      onClick={() => {
+                        // You can implement actual payment gateway integration here
+                        window.open('https://wa.me/918129424700?text=Hi, I would like to complete my payment for INFLUENCIA Edition 2.0. My registration ID is: ' + attendee.qrCode, '_blank');
+                      }}
+                      className="flex-1 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg uppercase text-sm"
+                    >
+                      <CreditCard className="w-5 h-5 mr-2 inline" />
+                      Complete Payment Now
+                    </button>
+                    <button 
+                      onClick={() => {
+                        window.open('https://wa.me/918129424700?text=Hi, I need help with payment for INFLUENCIA Edition 2.0. My registration ID is: ' + attendee.qrCode, '_blank');
+                      }}
+                      className="bg-white border-2 border-yellow-400 text-yellow-700 hover:bg-yellow-50 font-semibold py-3 px-6 rounded-lg transition-all duration-300 uppercase text-sm"
+                    >
+                      Need Help?
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="p-8 md:p-12">
             <div className="grid md:grid-cols-[1.5fr,1fr] gap-8 md:gap-12">
@@ -262,11 +324,16 @@ const Ticket = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground uppercase">PAYMENT</span>
-                    <span className={`text-sm font-semibold uppercase ${
-                      attendee.paymentStatus === 'confirmed' ? 'text-green-600' : 'text-yellow-600'
-                    }`}>
-                      {attendee.paymentStatus === 'confirmed' ? '✓ CONFIRMED' : '⏳ PENDING'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-semibold uppercase ${
+                        attendee.paymentStatus === 'confirmed' ? 'text-green-600' : 'text-yellow-600'
+                      }`}>
+                        {attendee.paymentStatus === 'confirmed' ? '✓ CONFIRMED' : '⏳ PENDING'}
+                      </span>
+                      {attendee.paymentStatus === 'pending' && (
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                      )}
+                    </div>
                   </div>
                   {attendee.attended && attendee.checkInTime && (
                     <div className="flex items-center justify-between">
@@ -282,7 +349,9 @@ const Ticket = () => {
               <div className="flex flex-col items-center justify-center">
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full"></div>
-                  <div className="relative bg-white p-6 md:p-8 rounded-2xl shadow-2xl border-4 border-primary/20">
+                  <div className={`relative bg-white p-6 md:p-8 rounded-2xl shadow-2xl border-4 ${
+                    attendee.paymentStatus === 'pending' ? 'border-yellow-400/50' : 'border-primary/20'
+                  }`}>
                     <QRCodeSVG
                       id="qr-svg"
                       value={attendee.qrCode}
@@ -292,12 +361,24 @@ const Ticket = () => {
                       fgColor="#000000"
                       bgColor="#ffffff"
                     />
+                    {attendee.paymentStatus === 'pending' && (
+                      <div className="absolute inset-0 bg-yellow-400/20 rounded-2xl flex items-center justify-center">
+                        <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase animate-pulse">
+                          Payment Required
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="mt-6 text-center space-y-2">
-                  <p className="text-sm font-semibold text-foreground uppercase">SCAN FOR ENTRY</p>
+                  <p className="text-sm font-semibold text-foreground uppercase">
+                    {attendee.paymentStatus === 'pending' ? 'Complete Payment for Entry' : 'Scan for Entry'}
+                  </p>
                   <p className="text-xs text-muted-foreground max-w-xs uppercase">
-                    PRESENT THIS QR CODE AT THE VENUE ENTRANCE FOR INSTANT VERIFICATION
+                    {attendee.paymentStatus === 'pending' 
+                      ? 'QR CODE ACTIVE AFTER PAYMENT CONFIRMATION' 
+                      : 'PRESENT THIS QR CODE AT THE VENUE ENTRANCE FOR INSTANT VERIFICATION'
+                    }
                   </p>
                   <div className="inline-block px-3 py-1 bg-muted rounded text-xs font-mono text-muted-foreground mt-2 uppercase">
                     {attendee.qrCode}
@@ -313,10 +394,16 @@ const Ticket = () => {
                   IMPORTANT INSTRUCTIONS
                 </h3>
                 <ul className="text-xs text-muted-foreground space-y-2 list-disc list-inside uppercase">
+                  {attendee.paymentStatus === 'pending' && (
+                    <li className="text-yellow-600 font-medium">⚠️ COMPLETE YOUR PAYMENT TO SECURE YOUR SPOT AT THE EVENT</li>
+                  )}
                   <li>THIS E-PASS IS VALID FOR ONE PERSON ONLY AND NON-TRANSFERABLE</li>
                   <li>PLEASE CARRY A VALID PHOTO ID ALONG WITH THIS E-PASS</li>
                   <li>ENTRY WILL BE ALLOWED ONLY AFTER QR CODE VERIFICATION</li>
                   <li>PLEASE ARRIVE 30 MINUTES BEFORE THE EVENT STARTS</li>
+                  {attendee.paymentStatus === 'pending' && (
+                    <li className="text-yellow-600 font-medium">💳 CONTACT SUPPORT FOR PAYMENT ASSISTANCE: +91 81294 24700</li>
+                  )}
                 </ul>
               </div>
             </div>
@@ -335,6 +422,33 @@ const Ticket = () => {
             </Button>
           </div>
         </div>
+
+        {/* Floating Payment Reminder - Only show for pending payments */}
+        {attendee.paymentStatus === 'pending' && (
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white p-4 shadow-2xl z-50 print:hidden">
+            <div className="container mx-auto flex items-center justify-between max-w-5xl">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-bounce">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm uppercase">Payment Required</p>
+                  <p className="text-xs opacity-90">Complete payment to secure your INFLUENCIA spot</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    window.open('https://wa.me/918129424700?text=Hi, I would like to complete my payment for INFLUENCIA Edition 2.0. My registration ID is: ' + attendee.qrCode, '_blank');
+                  }}
+                  className="bg-white text-yellow-700 hover:bg-yellow-50 font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300 transform hover:scale-105 uppercase"
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
