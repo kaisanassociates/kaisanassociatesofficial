@@ -18,7 +18,7 @@ const AboutInfluencia = () => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const autoPlayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Carousel timing configuration
   const TRANSITION_MS = 2000; // animation duration per slide
@@ -74,13 +74,16 @@ const AboutInfluencia = () => {
     }
   ];
 
-  const resetAutoPlay = () => {
+  const scheduleAutoPlay = () => {
     if (autoPlayRef.current) {
-      clearInterval(autoPlayRef.current);
+      clearTimeout(autoPlayRef.current);
     }
-    autoPlayRef.current = setInterval(() => {
+    autoPlayRef.current = setTimeout(() => {
       if (!isDragging) {
         goToNextSlide();
+      } else {
+        // If user is dragging, try again shortly
+        scheduleAutoPlay();
       }
     }, AUTO_INTERVAL_MS);
   };
@@ -89,24 +92,31 @@ const AboutInfluencia = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrentSlide((prev) => (prev + 1) % eventImages.length);
-    setTimeout(() => setIsTransitioning(false), TRANSITION_MS);
-    resetAutoPlay();
+    setTimeout(() => {
+      setIsTransitioning(false);
+      // Immediately schedule the next advance to maintain 2s cadence
+      scheduleAutoPlay();
+    }, TRANSITION_MS);
   };
 
   const goToPrevSlide = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrentSlide((prev) => (prev - 1 + eventImages.length) % eventImages.length);
-    setTimeout(() => setIsTransitioning(false), TRANSITION_MS);
-    resetAutoPlay();
+    setTimeout(() => {
+      setIsTransitioning(false);
+      scheduleAutoPlay();
+    }, TRANSITION_MS);
   };
 
   const goToSlide = (index: number) => {
     if (isTransitioning || index === currentSlide) return;
     setIsTransitioning(true);
     setCurrentSlide(index);
-    setTimeout(() => setIsTransitioning(false), TRANSITION_MS);
-    resetAutoPlay();
+    setTimeout(() => {
+      setIsTransitioning(false);
+      scheduleAutoPlay();
+    }, TRANSITION_MS);
   };
 
   // Touch handlers for mobile swipe
@@ -139,13 +149,16 @@ const AboutInfluencia = () => {
   };
 
   useEffect(() => {
-    resetAutoPlay();
+    // Kick off autoplay on mount
+    scheduleAutoPlay();
     return () => {
       if (autoPlayRef.current) {
-        clearInterval(autoPlayRef.current);
+        clearTimeout(autoPlayRef.current);
       }
     };
-  }, [currentSlide, isDragging]);
+    // isDragging intentionally omitted to avoid constant rescheduling
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const transformations = [
     {
