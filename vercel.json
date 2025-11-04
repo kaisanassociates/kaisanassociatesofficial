@@ -1,18 +1,4 @@
 {
-  "functions": {
-    "api/register.ts": {
-      "runtime": "nodejs20.x"
-    },
-    "api/registrations.ts": {
-      "runtime": "nodejs20.x"
-    },
-    "api/attendees/[attendeeId].ts": {
-      "runtime": "nodejs20.x"
-    },
-    "api/ticket/[ticketId].ts": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "build": {
     "env": {
       "NODE_ENV": "production"

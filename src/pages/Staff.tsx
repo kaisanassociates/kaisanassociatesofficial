@@ -19,12 +19,20 @@ const Staff = () => {
 
   useEffect(() => {
     return () => {
-      // Cleanup camera on unmount
-      if (html5QrCodeRef.current && isCameraActive) {
-        html5QrCodeRef.current.stop().catch(console.error);
+      // Cleanup camera on unmount - safely stop scanner
+      if (html5QrCodeRef.current) {
+        const scanner = html5QrCodeRef.current;
+        // Check if scanner is actually running before stopping
+        if (scanner.getState && scanner.getState() === 2) { // State 2 = SCANNING
+          scanner.stop()
+            .catch((err) => {
+              // Silently handle errors during cleanup
+              console.log('Scanner cleanup (safe to ignore):', err);
+            });
+        }
       }
     };
-  }, [isCameraActive]);
+  }, []);
 
   const handleLogin = () => {
     if (!staffKey.trim()) {
@@ -79,14 +87,25 @@ const Staff = () => {
   };
 
   const stopCamera = async () => {
-    if (html5QrCodeRef.current && isCameraActive) {
+    if (html5QrCodeRef.current) {
       try {
-        await html5QrCodeRef.current.stop();
-        setIsCameraActive(false);
-        toast.info("Camera stopped");
+        const scanner = html5QrCodeRef.current;
+        // Only stop if scanner is in scanning state
+        if (scanner.getState && scanner.getState() === 2) {
+          await scanner.stop();
+          setIsCameraActive(false);
+          toast.info("Camera stopped");
+        } else {
+          // Scanner not running, just update state
+          setIsCameraActive(false);
+        }
       } catch (err) {
         console.error("Error stopping camera:", err);
+        // Force state update even on error
+        setIsCameraActive(false);
       }
+    } else {
+      setIsCameraActive(false);
     }
   };
 
