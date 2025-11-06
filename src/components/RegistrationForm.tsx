@@ -117,10 +117,19 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
       const result = await apiService.registerAttendee(cleanData);
       
       if (result.success && result.data) {
+        // Merge the submitted data with the server response to ensure all fields are present
+        const completeAttendeeData = {
+          ...cleanData,
+          ...result.data,
+          fullName: result.data.fullName || result.data.name || cleanData.fullName,
+          contactNumber: result.data.contactNumber || result.data.phone || cleanData.contactNumber,
+          business: result.data.business || result.data.organization || cleanData.business,
+        };
+        
         toast.success("Registration successful! Redirecting to your e-pass...");
         
-        // Store attendee data and redirect to ticket
-        localStorage.setItem("attendee", JSON.stringify(result.data));
+        // Store complete attendee data and redirect to ticket
+        localStorage.setItem("attendee", JSON.stringify(completeAttendeeData));
         
         reset();
         setSelectedSectors([]);
@@ -210,7 +219,16 @@ const RegistrationForm = ({ isOpen, onClose }: RegistrationFormProps) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
+        <form 
+          onSubmit={handleSubmit(onSubmit)} 
+          onKeyDown={(e) => {
+            // Prevent form submission on Enter key press
+            if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+              e.preventDefault();
+            }
+          }}
+          className="p-8 space-y-6"
+        >
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
           <div className="space-y-6 animate-fade-in">
