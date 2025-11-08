@@ -252,7 +252,7 @@ const Ticket = () => {
                   </div>
                   <div className="flex-shrink-0 mt-4 md:mt-0">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <Button onClick={handlePayNow} className="w-full sm:w-auto h-11 px-6 font-semibold uppercase bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full text-sm">
+                      <Button onClick={() => window.location.href = 'upi://pay?ver=01&mode=01&pa=c0j9uodoggyh@idbi&pn=KAISAN%20ASSOCIATES%20LLP&mc=5816&qrMedium=06&am=2999&cu=INR'} className="w-full sm:w-auto h-11 px-6 font-semibold uppercase bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full text-sm">
                         <DollarSign className="w-4 h-4 mr-2" /> Pay Now
                       </Button>
                       <Button onClick={handleNeedHelp} variant="outline" className="w-full sm:w-auto h-11 px-4 rounded-full uppercase text-sm">

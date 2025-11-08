@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Phone, Mail, Calendar, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Hero from "@/components/Hero";
+import PastEdition from "@/components/PastEdition";
 import RegistrationForm from "@/components/RegistrationForm";
 import kaisanLogo from "@/assets/kaisan-logo.png";
 
@@ -23,7 +24,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Hero onRegisterClick={() => setIsFormOpen(true)} />
+    <Hero onRegisterClick={() => setIsFormOpen(true)} />
       
       {/* Contact Section */}
       <section className="py-20 md:py-32 bg-gradient-to-b from-background to-primary/5 relative overflow-hidden">
@@ -81,6 +82,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+  {/* Past Edition — single placement below CTA */}
+  <PastEdition id="past-edition" variant="default" />
 
       {/* Footer */}
       <footer className="py-12 md:py-16 bg-background border-t border-border/50">

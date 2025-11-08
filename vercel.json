@@ -11,6 +11,18 @@
       "destination": "/api/register"
     },
     {
+      "source": "/api/volunteer",
+      "destination": "/api/volunteer"
+    },
+    {
+      "source": "/api/volunteers",
+      "destination": "/api/volunteers"
+    },
+    {
+      "source": "/api/volunteers/:volunteerId",
+      "destination": "/api/volunteers/[volunteerId]"
+    },
+    {
       "source": "/api/registrations",
       "destination": "/api/registrations"
     },

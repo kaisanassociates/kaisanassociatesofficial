@@ -81,6 +81,49 @@ class ApiService {
     }
   }
 
+  async registerVolunteer(data: any): Promise<ApiResponse<any>> {
+    try {
+      // Normalization similar to attendee mapping
+      const normalized = {
+        fullName: data.fullName,
+        age: data.age ? Number(data.age) : undefined,
+        gender: data.gender,
+        whatsappNumber: data.whatsappNumber,
+        place: data.place,
+        organization: data.organization,
+        isNilgiriStudent: data.isNilgiriStudent,
+        previousExperience: data.previousExperience,
+        skills: data.skills,
+        contribution: data.contribution,
+        preferredAreas: data.preferredAreas || [],
+        preferredAreasOther: data.preferredAreasOther,
+        availableOnDec13: data.availableOnDec13,
+        availability: data.availability,
+        availabilityTime: data.availabilityTime,
+        motivation: data.motivation,
+        agreesToConduct: data.agreesToConduct,
+        signature: data.signature,
+        date: data.date,
+      };
+
+      const response = await fetch(`${this.baseUrl}/api/volunteer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(normalized),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Volunteer registration failed (${response.status}): ${text}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Volunteer registration API error:', error);
+      return { success: false, error: 'Failed to submit volunteer registration.' };
+    }
+  }
+
   async submitRegistration(data: any): Promise<ApiResponse<Attendee>> {
     try {
       const response = await fetch(`${this.baseUrl}/api/register`, {

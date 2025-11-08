@@ -19,6 +19,9 @@ import * as XLSX from "xlsx";
 const Admin = () => {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [filteredAttendees, setFilteredAttendees] = useState<any[]>([]);
+  const [volunteers, setVolunteers] = useState<any[]>([]);
+  const [filteredVolunteers, setFilteredVolunteers] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'attendees' | 'volunteers'>('attendees');
   const [searchQuery, setSearchQuery] = useState("");
   const [adminKey, setAdminKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -28,6 +31,11 @@ const Admin = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedAttendee, setEditedAttendee] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // Volunteer detail state
+  const [selectedVolunteer, setSelectedVolunteer] = useState<any>(null);
+  const [isVolunteerDialogOpen, setIsVolunteerDialogOpen] = useState(false);
+  const [isVolunteerEditMode, setIsVolunteerEditMode] = useState(false);
+  const [editedVolunteer, setEditedVolunteer] = useState<any>(null);
 
   const handleViewEpass = (attendee: any) => {
     localStorage.setItem("attendee", JSON.stringify(attendee));
@@ -84,6 +92,19 @@ const Admin = () => {
         if (result.success) {
           setAttendees(result.data);
           setFilteredAttendees(result.data);
+          // Fetch volunteers in parallel
+          try {
+            const vRes = await fetch('/api/volunteers', {
+              headers: { 'Authorization': `Bearer ${adminKey}` }
+            });
+            const vJson = await vRes.json();
+            if (vJson.success) {
+              setVolunteers(vJson.data);
+              setFilteredVolunteers(vJson.data);
+            }
+          } catch (e) {
+            console.error('Failed to load volunteers');
+          }
           setIsAuthenticated(true);
           toast.success("Admin access granted");
         } else {
@@ -101,13 +122,59 @@ const Admin = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = attendees.filter(
-      (a) =>
-        a.name.toLowerCase().includes(query.toLowerCase()) ||
-        a.email.toLowerCase().includes(query.toLowerCase()) ||
-        a.phone.includes(query)
-    );
-    setFilteredAttendees(filtered);
+    if (activeTab === 'attendees') {
+      const filtered = attendees.filter(
+        (a) =>
+          (a.name || a.fullName || '').toLowerCase().includes(query.toLowerCase()) ||
+          a.email.toLowerCase().includes(query.toLowerCase()) ||
+          (a.phone || a.contactNumber || '').includes(query)
+      );
+      setFilteredAttendees(filtered);
+    } else {
+      const filtered = volunteers.filter(
+        (v) =>
+          (v.fullName || '').toLowerCase().includes(query.toLowerCase()) ||
+          (v.whatsappNumber || '').includes(query) ||
+          (v.organization || '').toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredVolunteers(filtered);
+    }
+  };
+
+  const openVolunteerDialog = (vol: any) => {
+    setSelectedVolunteer(vol);
+    setEditedVolunteer({ ...vol });
+    setIsVolunteerEditMode(false);
+    setIsVolunteerDialogOpen(true);
+  };
+
+  const handleSaveVolunteer = async () => {
+    if (!editedVolunteer) return;
+    setIsLoading(true);
+    try {
+      const payload: any = {};
+      for (const k of ['status','preferredAreas','preferredAreasOther','availability','availabilityTime']) {
+        if (editedVolunteer[k] !== selectedVolunteer[k]) payload[k] = editedVolunteer[k];
+      }
+      const resp = await fetch(`/api/volunteers/${editedVolunteer._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type':'application/json','Authorization':`Bearer ${adminKey}` },
+        body: JSON.stringify(payload)
+      });
+      const json = await resp.json();
+      if (!json.success) throw new Error(json.error || 'Update failed');
+      // update arrays
+      const updatedList = volunteers.map(v => v._id === editedVolunteer._id ? json.data : v);
+      setVolunteers(updatedList);
+      setFilteredVolunteers(updatedList);
+      setSelectedVolunteer(json.data);
+      setIsVolunteerEditMode(false);
+      toast.success('Volunteer updated');
+    } catch(e:any){
+      toast.error(e.message || 'Failed to update volunteer');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleToggleAttendance = async (id: string) => {
@@ -424,6 +491,10 @@ const Admin = () => {
                 {attendees.filter((a) => !a.attended).length}
               </p>
             </div>
+            <div className="glass-panel p-6 md:col-span-3">
+              <h3 className="text-sm text-muted-foreground mb-2">Volunteers</h3>
+              <p className="text-3xl font-bold">{volunteers.length}</p>
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center gap-3">
@@ -435,6 +506,10 @@ const Admin = () => {
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
               />
+            </div>
+            <div className="flex gap-2">
+              <Button variant={activeTab==='attendees'? 'default':'outline'} onClick={()=>{setActiveTab('attendees'); setSearchQuery(''); setFilteredAttendees(attendees);}}>Registrations</Button>
+              <Button variant={activeTab==='volunteers'? 'default':'outline'} onClick={()=>{setActiveTab('volunteers'); setSearchQuery(''); setFilteredVolunteers(volunteers);}}>Volunteers</Button>
             </div>
             <Button onClick={handleExportCSV} variant="outline" className="h-12 md:h-10 rounded-full">
               <FileDown className="w-4 h-4 mr-2" />
@@ -458,6 +533,7 @@ const Admin = () => {
 
         <div className="glass-panel overflow-hidden">
           <div className="overflow-x-auto">
+            {activeTab === 'attendees' ? (
             <table className="w-full">
               <thead className="bg-muted/50 border-b border-border">
                 <tr>
@@ -583,6 +659,64 @@ const Admin = () => {
                 ))}
               </tbody>
             </table>
+            ) : (
+            <table className="w-full">
+              <thead className="bg-muted/50 border-b border-border">
+                <tr>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Name</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Organization</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">WhatsApp</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Availability</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Preferred Areas</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredVolunteers.map(v => (
+                  <tr key={v._id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-4 text-sm font-medium">{v.fullName}</td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">{v.organization || '—'}</td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">{v.whatsappNumber || '—'}</td>
+                    <td className="px-4 py-4 text-sm">{v.availability}{v.availability==='Part-time' && v.availabilityTime? ` (${v.availabilityTime})`:''}</td>
+                    <td className="px-4 py-4 text-sm max-w-xs truncate" title={v.preferredAreas?.join(', ')}>{Array.isArray(v.preferredAreas)? v.preferredAreas.join(', '): '—'}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => openVolunteerDialog(v)}
+                          className="h-9 w-9 rounded-full"
+                          title="Quick View"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={async () => {
+                            if (!confirm('Delete this volunteer?')) return;
+                            try {
+                              const resp = await fetch(`/api/volunteers/${v._id}`, { method:'PUT', headers:{ 'Content-Type':'application/json','Authorization':`Bearer ${adminKey}` }, body: JSON.stringify({ action:'delete' }) });
+                              const json = await resp.json();
+                              if (json.success) {
+                                const updated = volunteers.filter(x=>x._id!==v._id);
+                                setVolunteers(updated); setFilteredVolunteers(updated);
+                                toast.success('Volunteer deleted');
+                              } else throw new Error(json.error || 'Failed');
+                            } catch(e:any){ toast.error(e.message || 'Delete failed'); }
+                          }}
+                          className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            )}
           </div>
         </div>
 
@@ -783,6 +917,167 @@ const Admin = () => {
                     >
                       {isLoading ? 'Saving...' : 'Save Changes'}
                     </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Volunteer Detail Dialog */}
+        <Dialog open={isVolunteerDialogOpen} onOpenChange={setIsVolunteerDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>{isVolunteerEditMode ? 'Edit' : 'View'} Volunteer Details</span>
+                {!isVolunteerEditMode && selectedVolunteer && (
+                  <Button variant="outline" size="sm" onClick={() => setIsVolunteerEditMode(true)}>
+                    <Edit className="w-4 h-4 mr-2" /> Edit
+                  </Button>
+                )}
+              </DialogTitle>
+              <DialogDescription>
+                {isVolunteerEditMode ? 'Modify volunteer assignment and status' : 'Full volunteer registration details'}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedVolunteer && editedVolunteer && (
+              <div className="space-y-6 py-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Core Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Full Name</Label>
+                      <p className="mt-1 text-sm">{selectedVolunteer.fullName}</p>
+                    </div>
+                    <div>
+                      <Label>Organization</Label>
+                      <p className="mt-1 text-sm">{selectedVolunteer.organization || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>WhatsApp</Label>
+                      <p className="mt-1 text-sm">{selectedVolunteer.whatsappNumber || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Place</Label>
+                      <p className="mt-1 text-sm">{selectedVolunteer.place || '—'}</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Availability & Assignment</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Status</Label>
+                      {isVolunteerEditMode ? (
+                        <select
+                          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                          value={editedVolunteer.status || 'new'}
+                          onChange={(e)=> setEditedVolunteer({...editedVolunteer, status: e.target.value})}
+                        >
+                          {['new','review','approved','assigned','inactive'].map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      ) : (
+                        <p className="mt-1 text-sm font-medium capitalize">{selectedVolunteer.status}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Availability</Label>
+                      {isVolunteerEditMode ? (
+                        <select
+                          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                          value={editedVolunteer.availability || ''}
+                          onChange={(e)=> setEditedVolunteer({...editedVolunteer, availability: e.target.value})}
+                        >
+                          {['Full-time','Part-time','Not available'].map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                      ) : (
+                        <p className="mt-1 text-sm">{selectedVolunteer.availability}{selectedVolunteer.availability==='Part-time' && selectedVolunteer.availabilityTime ? ` (${selectedVolunteer.availabilityTime})`:''}</p>
+                      )}
+                    </div>
+                    {isVolunteerEditMode && editedVolunteer.availability === 'Part-time' && (
+                      <div className="md:col-span-2">
+                        <Label>Availability Time</Label>
+                        <Input
+                          className="mt-1"
+                          value={editedVolunteer.availabilityTime || ''}
+                          onChange={(e)=> setEditedVolunteer({...editedVolunteer, availabilityTime: e.target.value})}
+                        />
+                      </div>
+                    )}
+                    <div className="md:col-span-2">
+                      <Label>Preferred Areas</Label>
+                      {isVolunteerEditMode ? (
+                        <div className="space-y-2 mt-1">
+                          <Input
+                            placeholder="Comma-separated list"
+                            value={Array.isArray(editedVolunteer.preferredAreas) ? editedVolunteer.preferredAreas.join(', ') : ''}
+                            onChange={(e)=> setEditedVolunteer({...editedVolunteer, preferredAreas: e.target.value.split(',').map((s:string)=>s.trim()).filter(Boolean)})}
+                          />
+                          <Input
+                            placeholder="Other (optional)"
+                            value={editedVolunteer.preferredAreasOther || ''}
+                            onChange={(e)=> setEditedVolunteer({...editedVolunteer, preferredAreasOther: e.target.value})}
+                          />
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-sm" title={Array.isArray(selectedVolunteer.preferredAreas)? selectedVolunteer.preferredAreas.join(', '): ''}>
+                          {Array.isArray(selectedVolunteer.preferredAreas) && selectedVolunteer.preferredAreas.length ? selectedVolunteer.preferredAreas.join(', ') : '—'}
+                          {selectedVolunteer.preferredAreasOther ? ` | Other: ${selectedVolunteer.preferredAreasOther}` : ''}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Motivation & Skills</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Skills</Label>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{selectedVolunteer.skills || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Previous Experience</Label>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{selectedVolunteer.previousExperience || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Contribution</Label>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{selectedVolunteer.contribution || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Motivation</Label>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{selectedVolunteer.motivation || '—'}</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Meta</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <Label>Signed</Label>
+                      <p className="mt-1">{selectedVolunteer.signature || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Date</Label>
+                      <p className="mt-1">{selectedVolunteer.date || '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Created</Label>
+                      <p className="mt-1">{selectedVolunteer.createdAt ? new Date(selectedVolunteer.createdAt).toLocaleString() : '—'}</p>
+                    </div>
+                    <div>
+                      <Label>Agreed Conduct</Label>
+                      <p className="mt-1">{selectedVolunteer.agreesToConduct ? 'Yes' : 'No'}</p>
+                    </div>
+                  </div>
+                </div>
+                {isVolunteerEditMode && (
+                  <div className="flex gap-2 justify-end pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => { setIsVolunteerEditMode(false); setEditedVolunteer({ ...selectedVolunteer }); }}
+                      disabled={isLoading}
+                    >Cancel</Button>
+                    <Button onClick={handleSaveVolunteer} disabled={isLoading}>{isLoading ? 'Saving...' : 'Save Changes'}</Button>
                   </div>
                 )}
               </div>

@@ -12,12 +12,21 @@ app.use(express.json());
 
 // Import API route handlers from app/api/ directory (CommonJS versions)
 const registerHandler = require('./app/api/register.cjs');
+const volunteerHandler = require('./app/api/volunteer.cjs');
 const registrationsHandler = require('./app/api/registrations.cjs');
 const attendeesHandler = require('./app/api/attendees/[attendeeId].cjs');
 const ticketHandler = require('./app/api/ticket/[ticketId].cjs');
+const volunteersHandler = require('./app/api/volunteers.cjs');
+const volunteerUpdateHandler = require('./app/api/volunteers/[volunteerId].cjs');
 
 // API Routes - matching Vercel structure
 app.post('/api/register', registerHandler);
+app.post('/api/volunteer', volunteerHandler);
+app.get('/api/volunteers', volunteersHandler);
+app.put('/api/volunteers/:volunteerId', (req,res) => {
+  req.query = { ...req.query, volunteerId: req.params.volunteerId };
+  volunteerUpdateHandler(req,res);
+});
 app.get('/api/registrations', registrationsHandler);
 
 // Attendee routes - support both PUT and DELETE
