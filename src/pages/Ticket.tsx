@@ -129,7 +129,7 @@ const Ticket = () => {
                   <div class="details">
                     <div class="card"><div class="label">Email</div><div class="value">${attendee.email}</div></div>
                     <div class="card"><div class="label">Phone</div><div class="value">${attendee.contactNumber}</div></div>
-                    <div class="card"><div class="label">Event Date</div><div class="value">13 DECEMBER 2025</div></div>
+                    <div class="card"><div class="label">Event Date</div><div class="value">20 DECEMBER 2025</div></div>
                     <div class="card"><div class="label">Venue</div><div class="value">NILGIRI COLLEGE OF ARTS AND SCIENCE</div></div>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ const Ticket = () => {
                     <Calendar className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">EVENT DATE</p>
-                      <p className="text-sm font-medium uppercase">13 DECEMBER 2025</p>
+                      <p className="text-sm font-medium uppercase">20 DECEMBER 2025</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 sm:p-4 rounded-lg bg-muted/30 border border-border/50">

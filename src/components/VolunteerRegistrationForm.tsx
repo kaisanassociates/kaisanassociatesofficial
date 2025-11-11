@@ -26,11 +26,11 @@ const volunteerSchema = z.object({
   contribution: z.string().min(1,'Required'),
   preferredAreas: z.array(z.string()).min(1,'Select at least one'),
   preferredAreasOther: z.string().optional(),
-  availableOnDec13: z.enum(['Yes','No']),
+  availableOnDec20: z.enum(['Yes','No']),
   availability: z.enum(['Full-time','Not available','Part-time']),
   availabilityTime: z.string().optional(),
   motivation: z.string().min(10,'Add more detail').max(1500),
-  agreesToConduct: z.literal(true, { errorMap: () => ({ message: 'You must agree' }) }),
+  agreesToConduct: z.boolean().refine(val => val === true, { message: 'You must agree' }),
   signature: z.string().min(2,'Required'),
   date: z.string().min(4,'Required'),
 });
@@ -48,7 +48,7 @@ const VolunteerRegistrationForm = ({ onSuccess }: Props) => {
   const [submitting,setSubmitting] = useState(false);
   const { register, handleSubmit, watch, setValue, trigger, formState:{ errors } } = useForm<VolunteerFormData>({
     resolver: zodResolver(volunteerSchema),
-    defaultValues: { preferredAreas: [], isNilgiriStudent:'No', availableOnDec13:'Yes', availability:'Full-time', agreesToConduct:false }
+    defaultValues: { preferredAreas: [], isNilgiriStudent:'No', availableOnDec20:'Yes', availability:'Full-time', agreesToConduct:false }
   });
 
   const preferredAreas = watch('preferredAreas');
@@ -67,7 +67,7 @@ const VolunteerRegistrationForm = ({ onSuccess }: Props) => {
     let fields: (keyof VolunteerFormData)[] = [];
     if (step===1) fields = ['fullName','age','gender','whatsappNumber','place','organization','isNilgiriStudent'];
     if (step===2) fields = ['previousExperience','skills','contribution'];
-    if (step===3) fields = ['preferredAreas','availableOnDec13','availability'];
+    if (step===3) fields = ['preferredAreas','availableOnDec20','availability'];
     if (step===4) fields = ['motivation'];
     const valid = await trigger(fields);
     if (valid) setStep(s=>s+1);
@@ -81,19 +81,33 @@ const VolunteerRegistrationForm = ({ onSuccess }: Props) => {
       const payload = {
         ...data,
         isNilgiriStudent: data.isNilgiriStudent === 'Yes',
-        availableOnDec13: data.availableOnDec13 === 'Yes',
+        availableOnDec20: data.availableOnDec20 === 'Yes',
         agreesToConduct: data.agreesToConduct,
         preferredAreas: data.preferredAreas,
       };
       const res = await apiService.registerVolunteer(payload);
       if (res.success) {
-        toast.success('Volunteer registration submitted. Thank you!');
+        // Success handled by parent component
         onSuccess?.(res.data);
       } else {
-        toast.error(res.error || 'Submission failed');
+        // Check if it's a duplicate registration
+        if (res.duplicate || res.error?.includes('already registered')) {
+          toast.error(res.error || 'You have already registered as a volunteer. We will contact you soon!', {
+            duration: 5000,
+          });
+        } else {
+          toast.error(res.error || 'Submission failed. Please try again.');
+        }
       }
     } catch(e:any) {
-      toast.error(e.message || 'Submission failed');
+      // Check if error is from duplicate registration
+      if (e.message?.includes('already registered') || e.message?.includes('duplicate')) {
+        toast.error('You have already registered as a volunteer. We will contact you soon!', {
+          duration: 5000,
+        });
+      } else {
+        toast.error(e.message || 'Submission failed. Please check your connection and try again.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -184,10 +198,10 @@ const VolunteerRegistrationForm = ({ onSuccess }: Props) => {
               )}
             </Field>
             <div className="grid md:grid-cols-2 gap-6">
-              <Field label="Available on December 13?" className="md:col-span-1">
-                <RadioGroup onValueChange={v=>setValue('availableOnDec13', v as any)} className="flex gap-6">
+              <Field label="Available on December 20?" className="md:col-span-1">
+                <RadioGroup onValueChange={v=>setValue('availableOnDec20', v as any)} className="flex gap-6">
                   {['Yes','No'].map(o => (
-                    <div key={o} className="flex items-center space-x-2"><RadioGroupItem value={o} id={`dec13-${o}`} /><Label htmlFor={`dec13-${o}`}>{o}</Label></div>
+                    <div key={o} className="flex items-center space-x-2"><RadioGroupItem value={o} id={`dec20-${o}`} /><Label htmlFor={`dec20-${o}`}>{o}</Label></div>
                   ))}
                 </RadioGroup>
               </Field>

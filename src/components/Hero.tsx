@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
-import influenciaPoster from "@/assets/influencia-poster.jpeg";
+import influenciaPoster from "@/assets/influencia-poster.jpg";
 
 interface HeroProps {
   onRegisterClick: () => void;
@@ -56,7 +56,7 @@ const Hero = ({ onRegisterClick }: HeroProps) => {
               <div className="flex flex-wrap gap-6 text-sm">
                 <div className="flex items-center gap-2 text-foreground/70 group hover:text-primary transition-colors">
                   <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span className="font-medium">Saturday, 13 December 2025</span>
+                  <span className="font-medium">Saturday, 20 December 2025</span>
                 </div>
                 <div className="flex items-center gap-2 text-foreground/70 group hover:text-primary transition-colors">
                   <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />

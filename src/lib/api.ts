@@ -34,6 +34,7 @@ export interface ApiResponse<T = any> {
   data?: T;
   message?: string;
   error?: string;
+  duplicate?: boolean;
 }
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
@@ -97,7 +98,7 @@ class ApiService {
         contribution: data.contribution,
         preferredAreas: data.preferredAreas || [],
         preferredAreasOther: data.preferredAreasOther,
-        availableOnDec13: data.availableOnDec13,
+        availableOnDec20: data.availableOnDec20,
         availability: data.availability,
         availabilityTime: data.availabilityTime,
         motivation: data.motivation,
@@ -112,12 +113,18 @@ class ApiService {
         body: JSON.stringify(normalized),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Volunteer registration failed (${response.status}): ${text}`);
+        // Return the error with proper structure, including duplicate flag
+        return { 
+          success: false, 
+          error: result.error || `Volunteer registration failed (${response.status})`,
+          duplicate: result.duplicate || false
+        };
       }
 
-      return await response.json();
+      return result;
     } catch (error) {
       console.error('Volunteer registration API error:', error);
       return { success: false, error: 'Failed to submit volunteer registration.' };

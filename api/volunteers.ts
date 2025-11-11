@@ -15,7 +15,7 @@ const volunteerSchema = new mongoose.Schema({
   contribution: String,
   preferredAreas: [String],
   preferredAreasOther: String,
-  availableOnDec13: Boolean,
+  availableOnDec20: Boolean,
   availability: { type: String, enum: ['Full-time','Not available','Part-time'] },
   availabilityTime: String,
   motivation: String,

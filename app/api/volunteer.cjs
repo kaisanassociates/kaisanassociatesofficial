@@ -14,7 +14,7 @@ const volunteerSchema = new mongoose.Schema({
   contribution: { type: String },
   preferredAreas: [String],
   preferredAreasOther: { type: String },
-  availableOnDec13: { type: Boolean },
+  availableOnDec20: { type: Boolean },
   availability: { type: String, enum: ['Full-time', 'Not available', 'Part-time'] },
   availabilityTime: { type: String },
   motivation: { type: String },
@@ -49,6 +49,22 @@ module.exports = async function handler(req, res) {
     if (body.agreesToConduct === false) errors.push('You must agree to the conduct policy');
     if (errors.length) return res.status(400).json({ success: false, error: errors.join(', ') });
 
+    // Check for duplicate registration by whatsappNumber
+    const whatsappNumber = body.whatsappNumber || body.contactNumber;
+    if (whatsappNumber) {
+      const existingVolunteer = await Volunteer.findOne({ 
+        whatsappNumber: String(whatsappNumber).trim() 
+      });
+      
+      if (existingVolunteer) {
+        return res.status(409).json({ 
+          success: false, 
+          error: 'You have already registered as a volunteer. We will contact you soon!',
+          duplicate: true
+        });
+      }
+    }
+
     const yesNoToBool = (v) => v === true || v === 'Yes' || v === 'yes' || v === 'y';
 
     const doc = new Volunteer({
@@ -64,7 +80,7 @@ module.exports = async function handler(req, res) {
       contribution: body.contribution || undefined,
       preferredAreas: Array.isArray(body.preferredAreas) ? body.preferredAreas : (body.preferredAreas ? [body.preferredAreas] : []),
       preferredAreasOther: body.preferredAreasOther || body.preferredOther || undefined,
-      availableOnDec13: body.availableOnDec13 != null ? yesNoToBool(body.availableOnDec13) : undefined,
+      availableOnDec20: body.availableOnDec20 != null ? yesNoToBool(body.availableOnDec20) : undefined,
       availability: body.availability || undefined,
       availabilityTime: body.availabilityTime || (body.availability && body.availability.startsWith('Part-time') ? body.availability.split('Part-time')[1]?.trim() : undefined),
       motivation: body.motivation || undefined,
@@ -93,7 +109,7 @@ module.exports = async function handler(req, res) {
         contribution: doc.contribution,
         preferredAreas: doc.preferredAreas,
         preferredAreasOther: doc.preferredAreasOther,
-        availableOnDec13: doc.availableOnDec13,
+        availableOnDec20: doc.availableOnDec20,
         availability: doc.availability,
         availabilityTime: doc.availabilityTime,
         motivation: doc.motivation,

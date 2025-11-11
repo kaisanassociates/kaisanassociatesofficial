@@ -65,7 +65,7 @@ const Index = () => {
                 <Calendar className="w-8 h-8 text-primary mx-auto mb-4 group-hover:scale-110 transition-transform" />
                 <p className="text-sm text-muted-foreground mb-2 font-medium text-center">Event Date</p>
                 <p className="text-base md:text-lg font-semibold text-foreground text-center">
-                  Saturday, 13 Dec 2025
+                  Saturday, 20 Dec 2025
                 </p>
               </div>
             </div>

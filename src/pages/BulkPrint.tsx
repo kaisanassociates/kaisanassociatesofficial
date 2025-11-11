@@ -76,7 +76,7 @@ const BulkPrintPage = () => {
 
             {/* Footer */}
             <div className="text-center w-full">
-              <p className="text-xl font-semibold">13 DECEMBER 2025 | NILGIRI COLLEGE OF ARTS AND SCIENCE</p>
+              <p className="text-xl font-semibold">20 DECEMBER 2025 | NILGIRI COLLEGE OF ARTS AND SCIENCE</p>
               <p className="text-sm mt-2">This pass admits one person. This pass is non-transferable.</p>
             </div>
           </div>
