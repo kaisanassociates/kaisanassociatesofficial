@@ -3,17 +3,15 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NavigationBar from "@/components/NavigationBar";
-import RouteSplash from "@/components/RouteSplash";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import TicketAccess from "./pages/TicketAccess";
-import Ticket from "./pages/Ticket";
-import Admin from "./pages/Admin";
-import Staff from "./pages/Staff";
+import KaisanNavigationBar from "@/components/KaisanNavigationBar";
+import Footer from "@/components/Footer";
+
+// Kaisan Associates pages
+import Home from "./pages/Home";
+import Courses from "./pages/Courses";
+import AboutKaisan from "./pages/AboutKaisan";
+import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
-import Volunteer from "./pages/Volunteer";
-import BulkPrintPage from "./pages/BulkPrint";
 
 const queryClient = new QueryClient();
 
@@ -28,25 +26,25 @@ const App = () => {
             v7_startTransition: true,
             v7_relativeSplatPath: true,
           }}>
-          <div className="min-h-screen bg-gray-50">
-            {/* Route transition splash overlay */}
-            <RouteSplash />
-
-            <NavigationBar />
-            <main>
+          <div className="min-h-screen bg-white scroll-smooth">
+            <KaisanNavigationBar />
+            <main className="min-h-screen">
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/ticket-access" element={<TicketAccess />} />
-                <Route path="/ticket" element={<Ticket />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/staff" element={<Staff />} />
-                <Route path="/bulk-print" element={<BulkPrintPage />} />
-                <Route path="/volunteer" element={<Volunteer />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                {/* Kaisan Associates Main Site */}
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/about" element={<AboutKaisan />} />
+                <Route path="/contact" element={<ContactPage />} />
+                
+                {/* Course-specific routes - all go to courses page */}
+                <Route path="/courses/:programId" element={<Courses />} />
+                
+                {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
+            <Footer />
           </div>
         </BrowserRouter>
       </TooltipProvider>
