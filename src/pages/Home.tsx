@@ -216,69 +216,87 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {[
-              {
-                title: "Executive Business Management",
-                subtitle: "KiSE Programme",
-                description: "12-month hybrid program for senior professionals and entrepreneurs",
-                highlights: ["Quarterly Workshops", "Weekly Support", "Campus Immersion"],
-                link: "/courses/executive-program",
-                color: "gold"
-              },
-              {
-                title: "Influencia Edition 2",
-                subtitle: "Leadership Workshop",
-                description: "7-hour intensive programming for 250 change makers",
-                highlights: ["Personal Excellence", "Professional Growth", "Relationship Mastery"],
-                link: "/courses/influencia",
-                color: "sky"
-              },
-              {
-                title: "PRP Training",
-                subtitle: "Professional Development",
-                description: "Comprehensive training for career advancement",
-                highlights: ["Skill Enhancement", "Industry Recognition", "Practical Application"],
-                link: "/courses/prp-training",
-                color: "gold"
-              }
-            ].map((program, index) => (
-              <Link
-                key={index}
-                to={program.link}
-                className="group relative glass-panel p-8 rounded-3xl hover-lift hover:shadow-gold-glow transition-all duration-500 bg-white/5 backdrop-blur-md border border-white/10"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/30 rounded-bl-3xl rounded-tr-3xl" />
-                
-                <div className="relative">
-                  <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4 shadow-lg">
-                    {program.subtitle}
-                  </span>
-                  
-                  <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-dubai-gold transition-colors drop-shadow-lg">
-                    {program.title}
-                  </h3>
-                  
-                  <p className="text-gray-200 mb-6 leading-relaxed font-medium">
-                    {program.description}
-                  </p>
-                  
-                  <ul className="space-y-2 mb-6">
-                    {program.highlights.map((highlight, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                        <div className="w-1.5 h-1.5 rounded-full bg-dubai-gold" />
-                        {highlight}
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <div className="flex items-center text-dubai-gold font-bold text-lg group-hover:gap-3 gap-2 transition-all drop-shadow-lg">
-                    Learn More
-                    <ArrowRight className="w-5 h-5" />
-                  </div>
-                </div>
-              </Link>
-            ))}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Card 1 - Executive Business Management */}
+            <article className="group relative rounded-2xl overflow-hidden border border-gray-100 bg-white/95 shadow-xl p-6">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/20 rounded-bl-3xl rounded-tr-3xl pointer-events-none" />
+              <div className="relative z-10 text-dubai-navy">
+                <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4">KiSE Programme</span>
+                <h3 className="text-3xl font-extrabold text-dubai-navy mb-3 group-hover:text-dubai-gold transition-colors">Executive Business Management</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">12-month hybrid program for senior professionals and entrepreneurs</p>
+
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />
+                    Quarterly Workshops
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />
+                    Weekly Support
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />
+                    Campus Immersion
+                  </li>
+                </ul>
+
+                <Link to="/courses/executive-program" className="inline-flex items-center gap-3 text-dubai-gold font-semibold hover:underline">
+                  <span>Learn More</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </Link>
+              </div>
+            </article>
+
+            {/* Card 2 - Influencia Edition 2 */}
+            <article className="group relative rounded-2xl overflow-hidden border border-gray-100 bg-white/95 shadow-xl p-6">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/20 rounded-bl-3xl rounded-tr-3xl pointer-events-none" />
+              <div className="relative z-10 text-dubai-navy">
+                <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4">Leadership Workshop</span>
+                <h3 className="text-3xl font-extrabold text-dubai-navy mb-3 group-hover:text-dubai-gold transition-colors">Influencia Edition 2</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">7-hour intensive programming for 250 change makers</p>
+
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Personal Excellence</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Professional Growth</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Relationship Mastery</li>
+                </ul>
+
+                <Link to="/courses/influencia" className="inline-flex items-center gap-3 text-dubai-gold font-semibold hover:underline">
+                  <span>Learn More</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </Link>
+              </div>
+            </article>
+
+            {/* Card 3 - PRP Training */}
+            <article className="group relative rounded-2xl overflow-hidden border border-gray-100 bg-white/95 shadow-xl p-6">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/20 rounded-bl-3xl rounded-tr-3xl pointer-events-none" />
+              <div className="relative z-10 text-dubai-navy">
+                <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4">Professional Development</span>
+                <h3 className="text-3xl font-extrabold text-dubai-navy mb-3 group-hover:text-dubai-gold transition-colors">PRP Training</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">Comprehensive training for career advancement</p>
+
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Skill Enhancement</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Industry Recognition</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Practical Application</li>
+                </ul>
+
+                <Link to="/courses/prp-training" className="inline-flex items-center gap-3 text-dubai-gold font-semibold hover:underline">
+                  <span>Learn More</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </Link>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -357,12 +375,12 @@ const Home = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link to="/contact">
-                <Button size="lg" className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 py-6 text-lg font-semibold shadow-gold-glow">
+                <Button size="lg" className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 py-3 text-lg font-semibold shadow-gold-glow">
                   Get in Touch
                 </Button>
               </Link>
               <Link to="/courses">
-                <Button size="lg" className="btn-premium bg-white text-dubai-navy hover:bg-gray-100 border-2 border-white px-8 py-6 text-lg font-semibold shadow-lg">
+                <Button size="lg" className="btn-premium bg-white text-dubai-navy hover:bg-gray-100 border-2 border-white px-8 py-3 text-lg font-semibold shadow-lg">
                   View All Programs
                 </Button>
               </Link>
