@@ -1,15 +1,33 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Award, Users, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowRight, Award, Users, TrendingUp, Sparkles, ChevronDown, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Testimonials from "@/components/Testimonials";
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsVisible(true);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handle = () => setReducedMotion(mq.matches);
+    handle();
+    mq.addEventListener?.('change', handle);
+    return () => mq.removeEventListener?.('change', handle);
   }, []);
+
+  // Generate floating particle positions once to avoid layout thrash
+  const particles = useMemo(
+    () => Array.from({ length: 20 }, () => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: 5 + Math.random() * 10,
+      delay: Math.random() * 5,
+    })),
+    []
+  );
 
   const scrollToContent = () => {
     window.scrollTo({
@@ -34,7 +52,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-dubai-navy/40 to-black/50" />
         </div>
         {/* Animated background mesh gradient */}
-        <div className="absolute inset-0 gradient-mesh opacity-40 animate-pulse" />
+        <div className={`absolute inset-0 gradient-mesh opacity-40 ${reducedMotion ? '' : 'animate-pulse'}`} />
         
         {/* Dubai skyline silhouette SVG */}
         <div className="absolute bottom-0 left-0 right-0 opacity-10">
@@ -49,15 +67,15 @@ const Home = () => {
 
         {/* Floating particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+          {particles.map((p, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 bg-dubai-gold rounded-full opacity-20"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `float-slow ${5 + Math.random() * 10}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 5}s`,
+                left: p.left,
+                top: p.top,
+                animation: reducedMotion ? 'none' : `float-slow ${p.duration}s ease-in-out infinite`,
+                animationDelay: `${p.delay}s`,
               }}
             />
           ))}
@@ -90,7 +108,7 @@ const Home = () => {
               <Link to="/courses">
                 <Button 
                   size="lg" 
-                  className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 py-6 text-lg font-semibold shadow-gold-glow group"
+                  className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 py-3 text-lg font-semibold shadow-gold-glow group"
                 >
                   Explore Our Programs
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -99,7 +117,7 @@ const Home = () => {
               <Link to="/about">
                 <Button 
                   size="lg" 
-                  className="btn-premium bg-white text-dubai-navy hover:bg-gray-100 border-2 border-white px-8 py-6 text-lg font-semibold shadow-lg"
+                  className="btn-premium bg-white text-dubai-navy hover:bg-gray-100 border-2 border-white px-8 py-3 text-lg font-semibold shadow-lg"
                 >
                   Learn About Us
                 </Button>
@@ -218,82 +236,123 @@ const Home = () => {
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Card 1 - Executive Business Management */}
-            <article className="group relative rounded-2xl overflow-hidden border border-gray-100 bg-white/95 shadow-xl p-6">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/20 rounded-bl-3xl rounded-tr-3xl pointer-events-none" />
-              <div className="relative z-10 text-dubai-navy">
-                <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4">KiSE Programme</span>
-                <h3 className="text-3xl font-extrabold text-dubai-navy mb-3 group-hover:text-dubai-gold transition-colors">Executive Business Management</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">12-month hybrid program for senior professionals and entrepreneurs</p>
+            <article className="group relative rounded-3xl overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-dubai-gold to-yellow-600" />
+              <div className="p-8 relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold/10 text-dubai-gold text-xs font-bold tracking-wider">
+                    KiSE PROGRAMME
+                  </span>
+                  <div className="w-10 h-10 rounded-full bg-dubai-navy/5 flex items-center justify-center group-hover:bg-dubai-gold group-hover:text-white transition-colors duration-300">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-dubai-navy mb-4 group-hover:text-dubai-gold transition-colors">
+                  Executive Business Management
+                </h3>
+                <p className="text-gray-600 mb-8 leading-relaxed min-h-[80px]">
+                  12-month hybrid program for senior professionals and entrepreneurs seeking transformative growth.
+                </p>
 
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />
-                    Quarterly Workshops
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />
-                    Weekly Support
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />
-                    Campus Immersion
-                  </li>
-                </ul>
+                <div className="space-y-4 mb-8">
+                  {[
+                    "Quarterly Workshops",
+                    "Weekly Support",
+                    "Campus Immersion"
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm text-gray-600">
+                      <CheckCircle2 className="w-4 h-4 text-dubai-gold flex-shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
 
-                <Link to="/courses/executive-program" className="inline-flex items-center gap-3 text-dubai-gold font-semibold hover:underline">
-                  <span>Learn More</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                    <path d="M5 12h14"></path>
-                    <path d="m12 5 7 7-7 7"></path>
-                  </svg>
+                <Link to="/courses/executive-program" className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-dubai-navy text-white font-semibold hover:bg-dubai-gold hover:text-dubai-navy transition-all duration-300 group-hover:shadow-lg">
+                  <span>Explore Program</span>
+                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </div>
             </article>
 
             {/* Card 2 - Influencia Edition 2 */}
-            <article className="group relative rounded-2xl overflow-hidden border border-gray-100 bg-white/95 shadow-xl p-6">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/20 rounded-bl-3xl rounded-tr-3xl pointer-events-none" />
-              <div className="relative z-10 text-dubai-navy">
-                <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4">Leadership Workshop</span>
-                <h3 className="text-3xl font-extrabold text-dubai-navy mb-3 group-hover:text-dubai-gold transition-colors">Influencia Edition 2</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">7-hour intensive programming for 250 change makers</p>
+            <article className="group relative rounded-3xl overflow-hidden bg-dubai-navy shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-br from-dubai-navy via-slate-900 to-dubai-navy" />
+              <div className="absolute inset-0 gradient-mesh opacity-20" />
+              
+              <div className="p-8 relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold tracking-wider">
+                    WORKSHOP
+                  </span>
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-dubai-gold group-hover:text-dubai-navy transition-colors duration-300 text-white">
+                    <Users className="w-5 h-5" />
+                  </div>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-dubai-gold transition-colors">
+                  Influencia Edition 2
+                </h3>
+                <p className="text-gray-300 mb-8 leading-relaxed min-h-[80px]">
+                  7-hour intensive programming for 250 change makers focused on personal and professional excellence.
+                </p>
 
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Personal Excellence</li>
-                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Professional Growth</li>
-                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Relationship Mastery</li>
-                </ul>
+                <div className="space-y-4 mb-8">
+                  {[
+                    "Personal Excellence",
+                    "Professional Growth",
+                    "Relationship Mastery"
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm text-gray-300">
+                      <CheckCircle2 className="w-4 h-4 text-dubai-gold flex-shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
 
-                <Link to="/courses/influencia" className="inline-flex items-center gap-3 text-dubai-gold font-semibold hover:underline">
-                  <span>Learn More</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                    <path d="M5 12h14"></path>
-                    <path d="m12 5 7 7-7 7"></path>
-                  </svg>
+                <Link to="/courses/influencia" className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-white text-dubai-navy font-semibold hover:bg-dubai-gold hover:text-dubai-navy transition-all duration-300 shadow-lg">
+                  <span>Join the Movement</span>
+                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </div>
             </article>
 
             {/* Card 3 - PRP Training */}
-            <article className="group relative rounded-2xl overflow-hidden border border-gray-100 bg-white/95 shadow-xl p-6">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-dubai-gold/20 rounded-bl-3xl rounded-tr-3xl pointer-events-none" />
-              <div className="relative z-10 text-dubai-navy">
-                <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold text-dubai-navy text-xs font-bold mb-4">Professional Development</span>
-                <h3 className="text-3xl font-extrabold text-dubai-navy mb-3 group-hover:text-dubai-gold transition-colors">PRP Training</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">Comprehensive training for career advancement</p>
+            <article className="group relative rounded-3xl overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-dubai-gold to-yellow-600" />
+              <div className="p-8 relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="inline-block px-3 py-1 rounded-full bg-dubai-gold/10 text-dubai-gold text-xs font-bold tracking-wider">
+                    DEVELOPMENT
+                  </span>
+                  <div className="w-10 h-10 rounded-full bg-dubai-navy/5 flex items-center justify-center group-hover:bg-dubai-gold group-hover:text-white transition-colors duration-300">
+                    <Award className="w-5 h-5" />
+                  </div>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-dubai-navy mb-4 group-hover:text-dubai-gold transition-colors">
+                  PRP Training
+                </h3>
+                <p className="text-gray-600 mb-8 leading-relaxed min-h-[80px]">
+                  Comprehensive professional readiness program designed to accelerate career advancement.
+                </p>
 
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Skill Enhancement</li>
-                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Industry Recognition</li>
-                  <li className="flex items-center gap-2 text-sm text-gray-600"><span className="w-2 h-2 rounded-full bg-dubai-gold inline-block" />Practical Application</li>
-                </ul>
+                <div className="space-y-4 mb-8">
+                  {[
+                    "Skill Enhancement",
+                    "Industry Recognition",
+                    "Practical Application"
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm text-gray-600">
+                      <CheckCircle2 className="w-4 h-4 text-dubai-gold flex-shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
 
-                <Link to="/courses/prp-training" className="inline-flex items-center gap-3 text-dubai-gold font-semibold hover:underline">
-                  <span>Learn More</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                    <path d="M5 12h14"></path>
-                    <path d="m12 5 7 7-7 7"></path>
-                  </svg>
+                <Link to="/courses/prp-training" className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-dubai-navy text-white font-semibold hover:bg-dubai-gold hover:text-dubai-navy transition-all duration-300 group-hover:shadow-lg">
+                  <span>Start Training</span>
+                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </div>
             </article>
@@ -302,28 +361,35 @@ const Home = () => {
       </section>
 
       {/* Leadership Section - Dr. Rashid Gazzali */}
-      <section className="py-32 bg-gradient-to-b from-dubai-sand to-white relative">
-        <div className="container mx-auto px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            <div className="relative">
-              <div className="aspect-square rounded-3xl bg-gradient-to-br from-dubai-gold to-yellow-600 p-1">
-                <div className="w-full h-full rounded-3xl overflow-hidden">
+      <section className="py-32 bg-gradient-to-b from-dubai-sand to-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-dubai-gold/5 skew-x-12 transform origin-top-right" />
+        
+        <div className="container mx-auto px-6 lg:px-8 relative z-10">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-dubai-gold rounded-3xl rotate-6 opacity-20 group-hover:rotate-3 transition-transform duration-500" />
+              <div className="aspect-[4/5] rounded-3xl bg-gradient-to-br from-dubai-gold to-yellow-600 p-1 relative overflow-hidden shadow-2xl transform transition-transform duration-500 group-hover:-translate-y-2">
+                <div className="w-full h-full rounded-3xl overflow-hidden bg-white">
                   <img
                     src="/images/dr-rashid-formal.jpeg"
                     alt="Dr. Rashid Gazzali"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
+                {/* Floating badge */}
+                <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/50">
+                  <p className="text-dubai-navy font-bold text-lg">15+ Years</p>
+                  <p className="text-xs text-gray-600 uppercase tracking-wider">Global Experience</p>
+                </div>
               </div>
-              <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-dubai-gold/20 rounded-full blur-3xl" />
             </div>
 
             <div>
               <span className="inline-block px-4 py-2 rounded-full bg-dubai-gold/10 text-dubai-gold font-semibold text-sm mb-4">
                 VISIONARY LEADERSHIP
               </span>
-              <h2 className="text-5xl font-bold text-dubai-navy mb-6">
-                Led by Excellence
+              <h2 className="text-5xl font-bold text-dubai-navy mb-6 leading-tight">
+                Guided by <span className="text-gradient-gold">Excellence</span>
               </h2>
               <p className="text-xl text-gray-600 mb-6 leading-relaxed">
                 Under the visionary leadership of <span className="text-dubai-gold font-semibold">Dr. Rashid Gazzali</span>, 
@@ -334,22 +400,24 @@ const Home = () => {
                 development, organizational transformation, and human potential optimization.
               </p>
               
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
                 {[
                   "International Trainer",
                   "Life Coach",
                   "Managing Director",
                   "Executive Director"
                 ].map((title, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-dubai-gold" />
-                    <span className="text-sm text-gray-700">{title}</span>
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:border-dubai-gold/30 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-dubai-gold/10 flex items-center justify-center flex-shrink-0">
+                      <Award className="w-4 h-4 text-dubai-gold" />
+                    </div>
+                    <span className="text-sm font-medium text-dubai-navy">{title}</span>
                   </div>
                 ))}
               </div>
 
               <Link to="/about">
-                <Button size="lg" className="btn-premium bg-dubai-navy text-white hover:bg-slate-800 group">
+                <Button size="lg" className="btn-premium bg-dubai-navy text-white hover:bg-slate-800 group px-8">
                   Meet Our Team
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -358,6 +426,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <Testimonials />
 
       {/* CTA Section */}
       <section className="py-32 bg-gradient-to-br from-dubai-navy via-slate-900 to-dubai-navy relative overflow-hidden">

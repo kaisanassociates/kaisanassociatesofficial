@@ -32,23 +32,24 @@ const ContactPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Message Sent Successfully!",
-        description: "We'll get back to you within 24 hours.",
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        subject: "",
-        message: ""
-      });
+      const json = await res.json();
+      if (json.success) {
+        toast({ title: 'Message Sent Successfully!', description: "We'll get back to you within 24 hours." });
+        setFormData({ name: '', email: '', phone: '', company: '', subject: '', message: '' });
+      } else {
+        toast({ title: 'Failed to send', description: json.error || 'Please try again', });
+      }
+    } catch (err) {
+      toast({ title: 'Network error', description: 'Please try again later.' });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -196,8 +197,8 @@ const ContactPage = () => {
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name" className="text-dubai-navy font-semibold">
+                      <div className="space-y-2 group">
+                        <Label htmlFor="name" className="text-dubai-navy font-semibold group-focus-within:text-dubai-gold transition-colors">
                           Full Name <span className="text-red-500">*</span>
                         </Label>
                         <Input
@@ -207,12 +208,12 @@ const ContactPage = () => {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="border-gray-300 focus:border-dubai-gold focus:ring-dubai-gold"
+                          className="border-gray-200 bg-gray-50 focus:bg-white focus:border-dubai-gold focus:ring-dubai-gold transition-all duration-300 h-12"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="text-dubai-navy font-semibold">
+                      <div className="space-y-2 group">
+                        <Label htmlFor="email" className="text-dubai-navy font-semibold group-focus-within:text-dubai-gold transition-colors">
                           Email Address <span className="text-red-500">*</span>
                         </Label>
                         <Input
@@ -223,14 +224,14 @@ const ContactPage = () => {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="border-gray-300 focus:border-dubai-gold focus:ring-dubai-gold"
+                          className="border-gray-200 bg-gray-50 focus:bg-white focus:border-dubai-gold focus:ring-dubai-gold transition-all duration-300 h-12"
                         />
                       </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone" className="text-dubai-navy font-semibold">
+                      <div className="space-y-2 group">
+                        <Label htmlFor="phone" className="text-dubai-navy font-semibold group-focus-within:text-dubai-gold transition-colors">
                           Phone Number <span className="text-red-500">*</span>
                         </Label>
                         <Input
@@ -241,12 +242,12 @@ const ContactPage = () => {
                           value={formData.phone}
                           onChange={handleChange}
                           required
-                          className="border-gray-300 focus:border-dubai-gold focus:ring-dubai-gold"
+                          className="border-gray-200 bg-gray-50 focus:bg-white focus:border-dubai-gold focus:ring-dubai-gold transition-all duration-300 h-12"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="company" className="text-dubai-navy font-semibold">
+                      <div className="space-y-2 group">
+                        <Label htmlFor="company" className="text-dubai-navy font-semibold group-focus-within:text-dubai-gold transition-colors">
                           Company/Organization
                         </Label>
                         <Input
@@ -255,13 +256,13 @@ const ContactPage = () => {
                           placeholder="Your Company Name"
                           value={formData.company}
                           onChange={handleChange}
-                          className="border-gray-300 focus:border-dubai-gold focus:ring-dubai-gold"
+                          className="border-gray-200 bg-gray-50 focus:bg-white focus:border-dubai-gold focus:ring-dubai-gold transition-all duration-300 h-12"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="subject" className="text-dubai-navy font-semibold">
+                    <div className="space-y-2 group">
+                      <Label htmlFor="subject" className="text-dubai-navy font-semibold group-focus-within:text-dubai-gold transition-colors">
                         Subject <span className="text-red-500">*</span>
                       </Label>
                       <Input
@@ -271,12 +272,12 @@ const ContactPage = () => {
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="border-gray-300 focus:border-dubai-gold focus:ring-dubai-gold"
+                        className="border-gray-200 bg-gray-50 focus:bg-white focus:border-dubai-gold focus:ring-dubai-gold transition-all duration-300 h-12"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="message" className="text-dubai-navy font-semibold">
+                    <div className="space-y-2 group">
+                      <Label htmlFor="message" className="text-dubai-navy font-semibold group-focus-within:text-dubai-gold transition-colors">
                         Message <span className="text-red-500">*</span>
                       </Label>
                       <Textarea
@@ -287,7 +288,7 @@ const ContactPage = () => {
                         onChange={handleChange}
                         required
                         rows={6}
-                        className="border-gray-300 focus:border-dubai-gold focus:ring-dubai-gold resize-none"
+                        className="border-gray-200 bg-gray-50 focus:bg-white focus:border-dubai-gold focus:ring-dubai-gold transition-all duration-300 resize-none p-4"
                       />
                     </div>
 
@@ -326,27 +327,35 @@ const ContactPage = () => {
       </section>
 
       {/* Map Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
+            <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-dubai-navy mb-4">Find Us in Dubai</h2>
               <p className="text-xl text-gray-600">
                 Located in the heart of Dubai's business district
               </p>
             </div>
 
-            <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-dubai-gold/20">
-              <div className="aspect-video bg-gradient-to-br from-dubai-navy/5 to-dubai-gold/5 flex items-center justify-center">
-                <div className="text-center p-8">
-                  <MapPin className="w-16 h-16 text-dubai-gold mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-dubai-navy mb-2">Conrad Business Tower</h3>
-                  <p className="text-gray-600 mb-6">19th Floor, Sheikh Zayed Road, Dubai</p>
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-dubai-navy/90 to-dubai-gold/90 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none z-10" />
+              
+              <div className="aspect-video bg-gray-100 flex items-center justify-center relative">
+                {/* Placeholder for actual map iframe */}
+                <div className="absolute inset-0 bg-[url('/images/dubai-map-bg.jpg')] bg-cover bg-center opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700" />
+                
+                <div className="relative z-20 text-center p-12 bg-white/90 backdrop-blur-md rounded-3xl shadow-xl max-w-md mx-4 transform transition-transform duration-500 group-hover:scale-105">
+                  <div className="w-20 h-20 bg-dubai-gold rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-dubai-gold/30 animate-pulse">
+                    <MapPin className="w-10 h-10 text-dubai-navy" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-dubai-navy mb-2">Conrad Business Tower</h3>
+                  <p className="text-gray-600 mb-8 text-lg">19th Floor, Sheikh Zayed Road, Dubai</p>
                   <Button 
-                    className="bg-dubai-gold text-dubai-navy hover:bg-yellow-500"
+                    size="lg"
+                    className="w-full bg-dubai-navy text-white hover:bg-dubai-gold hover:text-dubai-navy transition-all duration-300 shadow-lg"
                     onClick={() => window.open('https://maps.google.com/?q=Conrad+Business+Tower+Dubai', '_blank')}
                   >
-                    <MapPin className="w-4 h-4 mr-2" />
+                    <MapPin className="w-5 h-5 mr-2" />
                     Open in Google Maps
                   </Button>
                 </div>
@@ -354,25 +363,31 @@ const ContactPage = () => {
             </div>
 
             {/* Additional Info */}
-            <div className="grid md:grid-cols-3 gap-6 mt-12">
-              <div className="text-center p-6 rounded-2xl bg-dubai-sand/30">
-                <Building2 className="w-8 h-8 text-dubai-gold mx-auto mb-3" />
-                <h4 className="font-bold text-dubai-navy mb-2">Prestigious Location</h4>
-                <p className="text-sm text-gray-600">
+            <div className="grid md:grid-cols-3 gap-8 mt-16">
+              <div className="text-center p-8 rounded-3xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-dubai-gold/20 group">
+                <div className="w-16 h-16 rounded-2xl bg-dubai-navy/5 flex items-center justify-center mx-auto mb-6 group-hover:bg-dubai-gold group-hover:text-white transition-colors duration-300">
+                  <Building2 className="w-8 h-8 text-dubai-navy group-hover:text-white" />
+                </div>
+                <h4 className="text-xl font-bold text-dubai-navy mb-2">Prestigious Location</h4>
+                <p className="text-gray-600">
                   Prime business address in Dubai's financial hub
                 </p>
               </div>
-              <div className="text-center p-6 rounded-2xl bg-dubai-sand/30">
-                <MapPin className="w-8 h-8 text-dubai-gold mx-auto mb-3" />
-                <h4 className="font-bold text-dubai-navy mb-2">Easy Access</h4>
-                <p className="text-sm text-gray-600">
+              <div className="text-center p-8 rounded-3xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-dubai-gold/20 group">
+                <div className="w-16 h-16 rounded-2xl bg-dubai-navy/5 flex items-center justify-center mx-auto mb-6 group-hover:bg-dubai-gold group-hover:text-white transition-colors duration-300">
+                  <MapPin className="w-8 h-8 text-dubai-navy group-hover:text-white" />
+                </div>
+                <h4 className="text-xl font-bold text-dubai-navy mb-2">Easy Access</h4>
+                <p className="text-gray-600">
                   Walking distance from Dubai Metro and major landmarks
                 </p>
               </div>
-              <div className="text-center p-6 rounded-2xl bg-dubai-sand/30">
-                <Clock className="w-8 h-8 text-dubai-gold mx-auto mb-3" />
-                <h4 className="font-bold text-dubai-navy mb-2">Flexible Hours</h4>
-                <p className="text-sm text-gray-600">
+              <div className="text-center p-8 rounded-3xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-dubai-gold/20 group">
+                <div className="w-16 h-16 rounded-2xl bg-dubai-navy/5 flex items-center justify-center mx-auto mb-6 group-hover:bg-dubai-gold group-hover:text-white transition-colors duration-300">
+                  <Clock className="w-8 h-8 text-dubai-navy group-hover:text-white" />
+                </div>
+                <h4 className="text-xl font-bold text-dubai-navy mb-2">Flexible Hours</h4>
+                <p className="text-gray-600">
                   Open Sunday to Thursday, appointments available
                 </p>
               </div>

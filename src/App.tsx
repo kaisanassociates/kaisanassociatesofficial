@@ -12,6 +12,9 @@ import Courses from "./pages/Courses";
 import AboutKaisan from "./pages/AboutKaisan";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
+
+import CourseDetail from "./pages/CourseDetail";
 
 const queryClient = new QueryClient();
 
@@ -34,11 +37,10 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/courses" element={<Courses />} />
+                <Route path="/courses/:slug" element={<CourseDetail />} />
                 <Route path="/about" element={<AboutKaisan />} />
                 <Route path="/contact" element={<ContactPage />} />
-                
-                {/* Course-specific routes - all go to courses page */}
-                <Route path="/courses/:programId" element={<Courses />} />
+                <Route path="/admin" element={<Admin />} />
                 
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />

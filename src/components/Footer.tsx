@@ -144,23 +144,32 @@ const Footer = () => {
         <Separator className="bg-white/10" />
 
         {/* Newsletter Section */}
-        <div className="py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-4">Stay Updated</h3>
-            <p className="text-gray-300 mb-6">
-              Subscribe to receive the latest insights, program updates, and exclusive offers
+        <div className="py-12 relative overflow-hidden rounded-3xl bg-white/5 border border-white/10 my-8">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-dubai-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-dubai-sky/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          
+          <div className="relative z-10 max-w-2xl mx-auto text-center px-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-dubai-gold/20 mb-4">
+              <Sparkles className="w-6 h-6 text-dubai-gold" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4">Stay Ahead of the Curve</h3>
+            <p className="text-gray-300 mb-8">
+              Join our exclusive community to receive leadership insights, industry trends, and early access to our programs.
             </p>
             <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
                 className="flex-1 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dubai-gold focus:bg-white/15 transition-all h-12"
                 required
               />
-              <Button type="submit" className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 whitespace-nowrap shadow-gold-glow h-12">
-                Subscribe
+              <Button type="submit" className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 whitespace-nowrap shadow-gold-glow h-12 font-semibold">
+                Subscribe Now
               </Button>
             </form>
+            <p className="text-xs text-gray-500 mt-4">
+              We respect your privacy. Unsubscribe at any time.
+            </p>
           </div>
         </div>
 

@@ -200,6 +200,97 @@ class ApiService {
       };
     }
   }
+
+  // Contacts
+  async getContacts(query?: string): Promise<ApiResponse<any[]>> {
+    try {
+      const url = new URL(`${this.baseUrl}/api/contacts`);
+      if (query) url.searchParams.set('q', query);
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Get contacts API error:', error);
+      return { success: false, error: 'Failed to fetch contacts.' };
+    }
+  }
+
+  async deleteContact(id: string): Promise<ApiResponse> {
+    try {
+      const url = new URL(`${this.baseUrl}/api/contacts`);
+      url.searchParams.set('id', id);
+      const response = await fetch(url.toString(), { method: 'DELETE' });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Delete contact API error:', error);
+      return { success: false, error: 'Failed to delete contact.' };
+    }
+  }
+
+  async submitContact(data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Submit contact API error:', error);
+      return { success: false, error: 'Failed to send message.' };
+    }
+  }
+
+  // Courses
+  async getCourses(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/courses`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Get courses API error:', error);
+      return { success: false, error: 'Failed to fetch courses.' };
+    }
+  }
+
+  async createCourse(data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/courses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Create course API error:', error);
+      return { success: false, error: 'Failed to create course.' };
+    }
+  }
+
+  async updateCourse(id: string, data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/courses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Update course API error:', error);
+      return { success: false, error: 'Failed to update course.' };
+    }
+  }
+
+  async deleteCourse(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/courses/${id}`, { method: 'DELETE' });
+      return await response.json();
+    } catch (error) {
+      console.error('Delete course API error:', error);
+      return { success: false, error: 'Failed to delete course.' };
+    }
+  }
 }
 
 export const apiService = new ApiService();
