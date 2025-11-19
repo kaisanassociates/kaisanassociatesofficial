@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import connectDB from '../../src/lib/db';
-import Course from '../../src/lib/models/Course';
+import connectDB from '../../src/lib/db.js';
+import Course from '../../src/lib/models/Course.js';
 
 function createSlug(text: string): string {
   return text

@@ -8,13 +8,17 @@ const AboutPage = () => {
   return (
     <div className="bg-dubai-sand">
       {/* Hero Section */}
-      <section className="relative py-28 bg-gradient-to-br from-dubai-navy via-slate-900 to-dubai-navy overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('/images/about-us.jpg')" }} />
+      <section className="relative py-32 bg-dubai-navy overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/images/dubai-skyline.jpg')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-dubai-navy via-transparent to-dubai-navy" />
+        </div>
+        <div className="absolute inset-0 gradient-mesh opacity-20" />
         <div className="container mx-auto px-6 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center text-white">
-            <span className="inline-block px-4 py-1 rounded-full bg-dubai-gold/20 text-dubai-gold font-semibold mb-4">ABOUT KAISAN</span>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">About Us</h1>
-            <p className="text-xl text-gray-300 leading-relaxed">Kaisan Associates is a leading provider of organizational development and talent management solutions.</p>
+            <span className="inline-block px-5 py-2 rounded-full bg-dubai-gold/20 text-dubai-gold font-bold text-xs uppercase tracking-widest mb-6 backdrop-blur-sm border border-dubai-gold/30">About Kaisan Associates</span>
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight">Transforming Leaders,<br /><span className="text-dubai-gold">Empowering Organizations</span></h1>
+            <p className="text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">Dubai's premier consultancy for transformative leadership development, organizational excellence, and human capital transformation.</p>
           </div>
         </div>
       </section>
@@ -43,14 +47,15 @@ const AboutPage = () => {
             <div className="order-1 lg:order-2">
               <div className="relative h-[400px] rounded-3xl overflow-hidden shadow-2xl group">
                 <img 
-                  src="/images/mission-image.jpg" 
-                  alt="Team collaboration" 
+                  src="/images/dr-rashid-speaking.jpg" 
+                  alt="Dr. Rashid Gazzali speaking at an event" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-dubai-navy/80 to-transparent" />
-                <div className="absolute bottom-8 left-8 text-white">
-                  <p className="text-2xl font-bold">Empowering Growth</p>
-                  <p className="text-dubai-gold">Since 2010</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-dubai-navy via-dubai-navy/50 to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8 text-white">
+                  <p className="text-3xl font-bold mb-2">Empowering Growth</p>
+                  <p className="text-dubai-gold text-lg font-semibold">15+ Years of Excellence</p>
+                  <p className="text-gray-300 text-sm mt-2">7000+ Professionals Trained Globally</p>
                 </div>
               </div>
             </div>
@@ -60,14 +65,15 @@ const AboutPage = () => {
             <div>
               <div className="relative h-[400px] rounded-3xl overflow-hidden shadow-2xl group">
                 <img 
-                  src="/images/vision-image.jpg" 
-                  alt="Future vision" 
+                  src="/images/executive-business-management-brochure.jpg" 
+                  alt="Executive Business Management Programme" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-dubai-navy/80 to-transparent" />
-                <div className="absolute bottom-8 left-8 text-white">
-                  <p className="text-2xl font-bold">Global Impact</p>
-                  <p className="text-dubai-gold">Shaping the Future</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-dubai-navy via-dubai-navy/60 to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8 text-white">
+                  <p className="text-3xl font-bold mb-2">Global Impact</p>
+                  <p className="text-dubai-gold text-lg font-semibold">Shaping Tomorrow's Leaders</p>
+                  <p className="text-gray-300 text-sm mt-2">World-Class Training Programs</p>
                 </div>
               </div>
             </div>

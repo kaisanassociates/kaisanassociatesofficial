@@ -340,9 +340,9 @@ const ContactPage = () => {
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200 group">
               <div className="absolute inset-0 bg-gradient-to-br from-dubai-navy/90 to-dubai-gold/90 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none z-10" />
               
-              <div className="aspect-video bg-gray-100 flex items-center justify-center relative">
-                {/* Placeholder for actual map iframe */}
-                <div className="absolute inset-0 bg-[url('/images/dubai-map-bg.jpg')] bg-cover bg-center opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
+                {/* Clean gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-dubai-navy/5 to-dubai-gold/5" />
                 
                 <div className="relative z-20 text-center p-12 bg-white/90 backdrop-blur-md rounded-3xl shadow-xl max-w-md mx-4 transform transition-transform duration-500 group-hover:scale-105">
                   <div className="w-20 h-20 bg-dubai-gold rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-dubai-gold/30 animate-pulse">

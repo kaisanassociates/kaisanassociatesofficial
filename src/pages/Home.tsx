@@ -38,77 +38,60 @@ const Home = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Hero Section with Dubai-inspired luxury */}
+      {/* Hero Section - Clean, Modern, Professional */}
       <section 
         ref={heroRef}
-        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-dubai-navy via-slate-900 to-dubai-navy"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-dubai-navy to-slate-800"
       >
-        {/* Background image with overlay for readability */}
+        {/* Crisp background with Dubai skyline */}
         <div className="absolute inset-0">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-35"
-            style={{ backgroundImage: "url('/images/dubai-skyline.jpg')" }}
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{ 
+              backgroundImage: "url('/images/dubai-skyline.jpg')",
+              backgroundPosition: "center 60%"
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-dubai-navy/40 to-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-dubai-navy/90 to-slate-800/95" />
         </div>
-        {/* Animated background mesh gradient */}
-        <div className={`absolute inset-0 gradient-mesh opacity-40 ${reducedMotion ? '' : 'animate-pulse'}`} />
         
-        {/* Dubai skyline silhouette SVG */}
-        <div className="absolute bottom-0 left-0 right-0 opacity-10">
-          <svg viewBox="0 0 1200 300" className="w-full h-auto">
-            <path
-              d="M0 300 L0 180 L50 180 L50 120 L80 120 L80 180 L130 180 L130 100 L160 100 L160 180 L210 180 L210 80 L240 80 L240 180 L290 180 L290 140 L320 140 L320 180 L370 180 L370 60 L400 60 L400 180 L450 180 L450 120 L480 120 L480 180 L530 180 L530 90 L560 90 L560 180 L610 180 L610 70 L640 40 L670 70 L670 180 L720 180 L720 130 L750 130 L750 180 L800 180 L800 100 L830 100 L830 180 L880 180 L880 150 L910 150 L910 180 L960 180 L960 110 L990 110 L990 180 L1040 180 L1040 140 L1070 140 L1070 180 L1120 180 L1120 90 L1150 90 L1150 180 L1200 180 L1200 300 Z"
-              fill="currentColor"
-              className="text-dubai-gold"
-            />
-          </svg>
-        </div>
-
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {particles.map((p, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-dubai-gold rounded-full opacity-20"
-              style={{
-                left: p.left,
-                top: p.top,
-                animation: reducedMotion ? 'none' : `float-slow ${p.duration}s ease-in-out infinite`,
-                animationDelay: `${p.delay}s`,
-              }}
-            />
-          ))}
+        {/* Subtle accent lines */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-dubai-gold to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-dubai-gold to-transparent" />
         </div>
 
         {/* Hero content */}
-        <div className="relative z-10 container mx-auto px-6 lg:px-8">
+        <div className="relative z-10 container mx-auto px-6 lg:px-8 py-20">
           <div className="max-w-5xl mx-auto text-center">
-            {/* Kaisan logo/badge */}
-            <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full glass-panel mb-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Sparkles className="w-5 h-5 text-dubai-gold animate-pulse" />
-              <span className="text-sm font-semibold text-white tracking-wider">
-                EXCELLENCE IN HUMAN RESOURCE DEVELOPMENT
+            {/* Clean badge */}
+            <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <Sparkles className="w-4 h-4 text-dubai-gold" />
+              <span className="text-xs font-bold text-white tracking-widest uppercase">
+                Excellence in Human Resource Development
               </span>
             </div>
 
-            {/* Main headline */}
-            <h1 className={`text-6xl md:text-7xl lg:text-8xl font-bold mb-6 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <span className="text-white">Empowering</span>
-              <br />
-              <span className="text-gradient-gold">Excellence</span>
+            {/* Clear, bold headline */}
+            <h1 className={`mb-8 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="text-5xl md:text-7xl lg:text-8xl font-black mb-2 leading-none">
+                <span className="text-white">Empowering</span>
+              </div>
+              <div className="text-5xl md:text-7xl lg:text-8xl font-black leading-none bg-gradient-to-r from-dubai-gold via-yellow-400 to-dubai-gold bg-clip-text text-transparent animate-gradient">
+                Excellence
+              </div>
             </h1>
 
-            <p className={`text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <p className={`text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed font-light transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               Dubai's premier consultancy for transformative leadership, organizational growth, and human potential development
             </p>
 
             {/* CTA buttons */}
-            <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center transition-all duration-1000 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <Link to="/courses">
                 <Button 
                   size="lg" 
-                  className="btn-premium bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-8 py-3 text-lg font-semibold shadow-gold-glow group"
+                  className="bg-dubai-gold text-dubai-navy hover:bg-yellow-500 px-10 py-6 text-base font-bold rounded-xl shadow-lg shadow-dubai-gold/20 hover:shadow-xl hover:shadow-dubai-gold/30 transition-all duration-300 hover:scale-105 group w-full sm:w-auto"
                 >
                   Explore Our Programs
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -117,40 +100,40 @@ const Home = () => {
               <Link to="/about">
                 <Button 
                   size="lg" 
-                  className="btn-premium bg-white text-dubai-navy hover:bg-gray-100 border-2 border-white px-8 py-3 text-lg font-semibold shadow-lg"
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20 hover:border-white/40 px-10 py-6 text-base font-bold rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
                 >
                   Learn About Us
                 </Button>
               </Link>
             </div>
 
-            {/* Stats row */}
-            <div className={`grid grid-cols-3 gap-8 mt-20 max-w-3xl mx-auto transition-all duration-1000 delay-800 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-dubai-gold mb-2">15+</div>
-                <div className="text-sm text-gray-400 uppercase tracking-wider">Years Experience</div>
+            {/* Elegant stats */}
+            <div className={`grid grid-cols-3 gap-6 md:gap-12 max-w-4xl mx-auto transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="text-center group">
+                <div className="text-4xl md:text-6xl font-black text-dubai-gold mb-2 transition-transform group-hover:scale-110 duration-300">15+</div>
+                <div className="text-xs md:text-sm text-gray-400 uppercase tracking-widest font-semibold">Years Experience</div>
               </div>
-              <div className="text-center border-x border-white/20">
-                <div className="text-4xl md:text-5xl font-bold text-dubai-gold mb-2">7000+</div>
-                <div className="text-sm text-gray-400 uppercase tracking-wider">Professionals Trained</div>
+              <div className="text-center group border-x border-white/10">
+                <div className="text-4xl md:text-6xl font-black text-dubai-gold mb-2 transition-transform group-hover:scale-110 duration-300">7000+</div>
+                <div className="text-xs md:text-sm text-gray-400 uppercase tracking-widest font-semibold">Professionals Trained</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-dubai-gold mb-2">3</div>
-                <div className="text-sm text-gray-400 uppercase tracking-wider">Signature Programs</div>
+              <div className="text-center group">
+                <div className="text-4xl md:text-6xl font-black text-dubai-gold mb-2 transition-transform group-hover:scale-110 duration-300">3</div>
+                <div className="text-xs md:text-sm text-gray-400 uppercase tracking-widest font-semibold">Signature Programs</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Clean scroll indicator */}
         <button
           onClick={scrollToContent}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer group"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 cursor-pointer group"
           aria-label="Scroll to content"
         >
-          <div className="flex flex-col items-center gap-2 text-white/60 group-hover:text-white transition-colors">
-            <span className="text-sm uppercase tracking-wider">Discover More</span>
-            <ChevronDown className="w-6 h-6" />
+          <div className="flex flex-col items-center gap-2 text-white/40 group-hover:text-dubai-gold transition-all duration-300">
+            <span className="text-xs uppercase tracking-widest font-bold">Discover More</span>
+            <ChevronDown className="w-5 h-5 animate-bounce" />
           </div>
         </button>
       </section>

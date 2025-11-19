@@ -37,9 +37,7 @@ export interface ApiResponse<T = any> {
   duplicate?: boolean;
 }
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? window.location.origin 
-  : 'http://localhost:3000';
+const API_BASE_URL = window.location.origin;
 
 class ApiService {
   private baseUrl: string;

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import connectDB from '../src/lib/db';
-import ContactMessage from '../src/lib/models/ContactMessage';
+import connectDB from '../src/lib/db.js';
+import ContactMessage from '../src/lib/models/ContactMessage.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

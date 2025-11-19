@@ -5,25 +5,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const testimonials = [
   {
-    name: "Sarah Al-Maktoum",
-    role: "HR Director, TechCorp Dubai",
-    content: "Kaisan Associates transformed our leadership team. The KiSE Programme is a game-changer for anyone looking to elevate their executive presence.",
+    name: "Dr. Rashid Gazzali",
+    role: "Founder & Lead Trainer, Kaisan Associates",
+    content: "Our mission is to transform leaders into visionaries, and organizations into powerhouses of innovation and excellence. Every program we create is designed to unlock human potential.",
     rating: 5,
-    image: "/images/avatar-1.jpg"
+    image: "/images/dr-rashid-formal.jpeg"
   },
   {
-    name: "James Wilson",
-    role: "Senior Manager, Global Logistics",
-    content: "The Influencia workshop was an eye-opener. It provided practical tools for relationship management that I use every day.",
+    name: "Prof. Arvinder S. Chawla",
+    role: "Former Vice Chancellor, Academic Partner",
+    content: "The KiSE Executive Programme represents the pinnacle of business education, blending academic rigor with practical application to create truly transformative learning experiences.",
     rating: 5,
-    image: "/images/avatar-2.jpg"
+    image: "/images/prof-arvinder.jpg"
   },
   {
-    name: "Fatima Ahmed",
-    role: "Entrepreneur",
-    content: "Dr. Rashid's coaching style is unique and highly effective. He helped me clarify my vision and build a roadmap for my business.",
+    name: "Dr. Saji Gopinath",
+    role: "Former Vice Chancellor, Senior Mentor",
+    content: "Kaisan Associates' approach to professional development is both innovative and impactful. Their programs bridge the gap between theoretical knowledge and real-world success.",
     rating: 5,
-    image: "/images/avatar-3.jpg"
+    image: "/images/dr-saji.jpg"
   }
 ];
 
@@ -46,12 +46,15 @@ const Testimonials = () => {
 
       <div className="container mx-auto px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-2 rounded-full bg-dubai-gold/10 text-dubai-gold font-semibold text-sm mb-4">
-            TESTIMONIALS
+          <span className="inline-block px-5 py-2 rounded-full bg-dubai-gold/10 text-dubai-gold font-bold text-xs uppercase tracking-widest mb-6 border border-dubai-gold/20">
+            Leadership Voices
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-dubai-navy mb-6">
-            What Our Clients Say
+          <h2 className="text-4xl md:text-5xl font-bold text-dubai-navy mb-4">
+            Meet Our Expert Team
           </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Insights from the visionaries shaping the future of organizational excellence
+          </p>
         </div>
 
         <div className="max-w-4xl mx-auto">
